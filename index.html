@@ -634,27 +634,26 @@ main{max-width:1100px;margin:0 auto;padding:24px}
 <div id="toast"></div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-
 /* ══════════════════════════════════════════
-   STATE
+   GLOBAL CREDENTIALS & STATE
 ══════════════════════════════════════════ */
-const ADMIN_ID   = 'admin';
-const ADMIN_PASS = 'arwa_accounts_2026-2027';
-const VIEWER_PASS = 'arwa2627';   // members viewer password
-let currentRole = '';             // 'admin' or 'viewer'
+const ADMIN_ID    = 'admin';
+const ADMIN_PASS  = 'arwa_accounts_2026-2027';
+const VIEWER_PASS = 'arwa2627';
+let currentRole   = '';
 
-// All data stored in memory (persists via localStorage)
-let entries = JSON.parse(localStorage.getItem('arwa_entries_2627') || '[]');
-let mcStatus = JSON.parse(localStorage.getItem('arwa_mc_2627') || '{}');
-let assocPhone = localStorage.getItem('arwa_phone') || '';
-let selectedWAFlat = '';
-
-// Opening balance from FY 2025-26 closing
 const OPN_CASH = 4100;
 const OPN_BANK = 30690;
 
-// Flat layout
+let entries      = [];
+let mcStatus     = {};
+let assocPhone   = '';
+let selectedWAFlat = '';
+let editingId    = null;
+
+const MONTHS = ['April 2026','May 2026','June 2026','July 2026','August 2026','September 2026',
+                'October 2026','November 2026','December 2026','January 2027','February 2027','March 2027'];
+
 const FLOORS = [
   { name:'5th Floor', flats:['A5','B5','C5','D5','E5','F5','G5'] },
   { name:'4th Floor', flats:['A4','B4','C4','D4','E4','F4','G4'] },
@@ -663,76 +662,106 @@ const FLOORS = [
   { name:'1st Floor', flats:['A1','B1','C1/D1','E1','F1','G1'] },
 ];
 
-const MONTHS = ['April 2026','May 2026','June 2026','July 2026','August 2026','September 2026',
-                'October 2026','November 2026','December 2026','January 2027','February 2027','March 2027'];
-
-/* ══════════════════════════════════════════
-   LOGIN
-══════════════════════════════════════════ */
+/* ── LOGIN (must be global — called from onclick) ── */
 function doLogin(){
-  const user = document.getElementById('loginUser').value.trim();
-  const pass = document.getElementById('loginPass').value;
+  const user = (document.getElementById('loginUser').value || '').trim();
+  const pass = (document.getElementById('loginPass').value || '');
 
   if(user === ADMIN_ID && pass === ADMIN_PASS){
     currentRole = 'admin';
-    document.getElementById('loginOverlay').style.display='none';
+    document.getElementById('loginOverlay').style.display = 'none';
+    loadData();
     applyRole();
     init();
     showToast('✅ Welcome, Treasurer! Full access granted.','success');
+
   } else if(pass === VIEWER_PASS){
     currentRole = 'viewer';
-    document.getElementById('loginOverlay').style.display='none';
+    document.getElementById('loginOverlay').style.display = 'none';
+    loadData();
     applyRole();
     init();
-    showToast('👁 Viewer access — MC Status & Reports only.');
+    showToast('👁 Member Viewer access — MC Status & Reports.');
+
   } else {
-    document.getElementById('loginErr').style.display='block';
-    document.getElementById('loginPass').value='';
-    document.getElementById('loginUser').focus();
-  }
-}
-
-function applyRole(){
-  const isAdmin = currentRole === 'admin';
-
-  // Show/hide admin-only nav items
-  document.querySelectorAll('.admin-only').forEach(el => {
-    el.style.display = isAdmin ? '' : 'none';
-  });
-
-  // Show role badge in navbar
-  const badge = document.getElementById('roleBadge');
-  if(badge){
-    badge.textContent  = isAdmin ? '🔐 Admin' : '👁 Viewer';
-    badge.style.color  = isAdmin ? 'var(--gold2)' : 'rgba(255,255,255,.5)';
-  }
-
-  // Show/hide viewer banner in MC
-  const vb = document.getElementById('viewerBanner');
-  if(vb) vb.style.display = isAdmin ? 'none' : 'block';
-
-  // If viewer, go to MC section directly
-  if(!isAdmin){
-    setTimeout(()=>{
-      document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-      document.querySelectorAll('.nav-link').forEach(b=>b.classList.remove('active'));
-      document.getElementById('sec-mc').classList.add('active');
-      document.querySelector('[onclick="showSection('mc')"]').classList.add('active');
-    }, 100);
+    const err = document.getElementById('loginErr');
+    err.style.display = 'block';
+    err.textContent   = '❌ Wrong credentials. Try again.';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginPass').focus();
   }
 }
 
 function doLogout(){
   currentRole = '';
-  document.getElementById('loginOverlay').style.display='flex';
-  document.getElementById('loginPass').value='';
-  document.getElementById('loginUser').value='';
-  document.getElementById('loginErr').style.display='none';
+  document.getElementById('loginOverlay').style.display = 'flex';
+  document.getElementById('loginPass').value  = '';
+  document.getElementById('loginUser').value  = '';
+  document.getElementById('loginErr').style.display = 'none';
+}
+
+function loadData(){
+  entries    = JSON.parse(localStorage.getItem('arwa_entries_2627') || '[]');
+  mcStatus   = JSON.parse(localStorage.getItem('arwa_mc_2627')      || '{}');
+  assocPhone = localStorage.getItem('arwa_phone') || '';
+}
+
+/* ── SECTION NAV (global) ── */
+function showSection(id){
+  if(currentRole === 'viewer' && (id === 'entry' || id === 'whatsapp')){
+    showToast('🔒 Restricted — Admin (Treasurer) access only','error');
+    return;
+  }
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  if(event && event.target) event.target.classList.add('active');
+}
+
+/* ── TOAST (global — used by login) ── */
+function showToast(msg, type=''){
+  const t = document.getElementById('toast');
+  if(!t) return;
+  t.textContent = msg;
+  t.className   = 'show' + (type ? ' toast-' + type : '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.className = ''; }, 3500);
 }
 
 /* ══════════════════════════════════════════
-   INIT
+   ALL OTHER FUNCTIONS — init on DOM ready
 ══════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', function(){
+
+  // Allow Enter key on login fields
+  ['loginUser','loginPass'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+  });
+
+function applyRole(){
+  const isAdmin = currentRole === 'admin';
+  document.querySelectorAll('.admin-only').forEach(el => {
+    el.style.display = isAdmin ? '' : 'none';
+  });
+  const badge = document.getElementById('roleBadge');
+  if(badge){
+    badge.textContent = isAdmin ? '🔐 Admin' : '👁 Viewer';
+    badge.style.color = isAdmin ? 'var(--gold2)' : 'rgba(255,255,255,.5)';
+  }
+  const vb = document.getElementById('viewerBanner');
+  if(vb) vb.style.display = isAdmin ? 'none' : 'block';
+
+  if(!isAdmin){
+    // Navigate viewer to MC Status
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+    document.getElementById('sec-mc').classList.add('active');
+    const mcBtn = document.querySelector('[onclick="showSection('mc')"]');
+    if(mcBtn) mcBtn.classList.add('active');
+  }
+}
+
 function init(){
   setTodayDate();
   renderDashboard();
@@ -745,88 +774,69 @@ function init(){
 
 function setTodayDate(){
   const today = new Date().toISOString().split('T')[0];
-  document.getElementById('entDate').value = today;
+  const el = document.getElementById('entDate');
+  if(el) el.value = today;
 }
 
-/* ══════════════════════════════════════════
-   SECTION NAV
-══════════════════════════════════════════ */
-function showSection(id){
-  // Restrict viewers from admin sections
-  if(currentRole==='viewer' && (id==='entry'||id==='whatsapp')){
-    showToast('🔒 Restricted — Admin (Treasurer) access only','error');
-    return;
-  }
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.nav-link').forEach(b=>b.classList.remove('active'));
-  document.getElementById('sec-'+id).classList.add('active');
-  if(event && event.target) event.target.classList.add('active');
-}
+function fmtRs(n){ return '₹' + Math.round(n).toLocaleString('en-IN'); }
+function fmtNum(n){ return n === 0 ? '—' : Math.round(Math.abs(n)).toLocaleString('en-IN'); }
 
-/* ══════════════════════════════════════════
-   BALANCE CALCULATION
-══════════════════════════════════════════ */
 function calcBalances(){
   let cash = OPN_CASH, bank = OPN_BANK, totalExp = 0, totalCr = 0;
-  const sorted = [...entries].sort((a,b)=>a.date.localeCompare(b.date));
+  const sorted = [...entries].sort((a,b) => a.date.localeCompare(b.date));
   sorted.forEach(e => {
-    const dr = parseFloat(e.debit)||0;
-    const cr = parseFloat(e.credit)||0;
-    if(e.mode==='Cash'){
-      cash += cr - dr;
-    } else {
-      bank += cr - dr;
-    }
-    if(dr>0) totalExp += dr;
-    if(cr>0) totalCr += cr;
+    const dr = parseFloat(e.debit)  || 0;
+    const cr = parseFloat(e.credit) || 0;
+    if(e.mode === 'Cash'){ cash += cr - dr; } else { bank += cr - dr; }
+    if(dr > 0) totalExp += dr;
+    if(cr > 0) totalCr  += cr;
   });
-  return { cash, bank, total:cash+bank, totalExp, totalCr };
+  return { cash, bank, total: cash + bank, totalExp, totalCr };
 }
 
-function fmtRs(n){ return '₹'+Math.round(n).toLocaleString('en-IN'); }
-function fmtNum(n){ return n===0?'—':Math.round(Math.abs(n)).toLocaleString('en-IN'); }
-
-/* ══════════════════════════════════════════
-   DASHBOARD
-══════════════════════════════════════════ */
+/* ── DASHBOARD ── */
 function renderDashboard(){
   const b = calcBalances();
-  document.getElementById('statCash').textContent = fmtRs(b.cash);
-  document.getElementById('statBank').textContent = fmtRs(b.bank);
-  document.getElementById('statTotal').textContent = fmtRs(b.total);
-  document.getElementById('statExp').textContent = fmtRs(b.totalExp);
-  document.getElementById('statEntries').textContent = entries.length;
+  const ids = {statCash:b.cash, statBank:b.bank, statTotal:b.total, statExp:b.totalExp};
+  Object.entries(ids).forEach(([id,val]) => {
+    const el = document.getElementById(id);
+    if(el) el.textContent = fmtRs(val);
+  });
+  const se = document.getElementById('statEntries');
+  if(se) se.textContent = entries.length;
 
-  // MC counts (current month from mcStatus)
-  const curMonth = MONTHS[new Date().getMonth() >= 3 ? new Date().getMonth()-3 : new Date().getMonth()+9];
+  const curMonthIdx = new Date().getMonth() >= 3 ? new Date().getMonth()-3 : new Date().getMonth()+9;
+  const curMonth = MONTHS[Math.min(curMonthIdx, 11)];
   const mc = mcStatus[curMonth] || {};
-  let paid=0,reminder=0,def=0;
-  Object.values(mc).forEach(v=>{ if(v==='paid') paid++; else if(v==='reminder') reminder++; else if(v==='defaulter') def++; });
-  document.getElementById('statPaid').textContent = paid;
-  document.getElementById('statReminder').textContent = reminder;
-  document.getElementById('statDefault').textContent = def;
+  let paid=0, reminder=0, def=0;
+  Object.values(mc).forEach(v => { if(v==='paid') paid++; else if(v==='reminder') reminder++; else if(v==='defaulter') def++; });
+  const sp=document.getElementById('statPaid'), sr=document.getElementById('statReminder'), sd=document.getElementById('statDefault');
+  if(sp) sp.textContent = paid;
+  if(sr) sr.textContent = reminder;
+  if(sd) sd.textContent = def;
 
-  // Recent entries (last 8)
-  const recent = [...entries].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8);
+  const sorted = [...entries].sort((a,b) => a.date.localeCompare(b.date));
+  let rc=OPN_CASH, rb=OPN_BANK;
+  const balMap={};
+  sorted.forEach(e => {
+    const dr=parseFloat(e.debit)||0, cr=parseFloat(e.credit)||0;
+    if(e.mode==='Cash') rc+=cr-dr; else rb+=cr-dr;
+    balMap[e.id]={cash:rc, bank:rb};
+  });
+  const recent = [...entries].sort((a,b) => b.date.localeCompare(a.date)).slice(0,8);
   const tbody = document.getElementById('recentTbody');
+  if(!tbody) return;
   if(recent.length===0){
     tbody.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="es-icon">📭</div><p>No entries yet.</p></div></td></tr>';
     return;
   }
-  let runCash=OPN_CASH, runBank=OPN_BANK;
-  const sorted = [...entries].sort((a,b)=>a.date.localeCompare(b.date));
-  const balMap={};
-  sorted.forEach(e=>{
-    const dr=parseFloat(e.debit)||0, cr=parseFloat(e.credit)||0;
-    if(e.mode==='Cash') runCash+=cr-dr; else runBank+=cr-dr;
-    balMap[e.id]={cash:runCash,bank:runBank};
-  });
-  tbody.innerHTML = recent.map((e,i)=>{
-    const bal=balMap[e.id]||{cash:0,bank:0};
+  tbody.innerHTML = recent.map((e,i) => {
+    const bal = balMap[e.id] || {cash:OPN_CASH, bank:OPN_BANK};
+    const typeCls = e.type==='MC'?'type-mc':e.type==='EXP'?'type-exp':'type-other';
     return `<tr class="${i%2?'alt':''}">
       <td>${e.date}</td>
       <td>${e.desc}</td>
-      <td><span class="type-badge type-${e.type.toLowerCase()==='mc'?'mc':e.type.toLowerCase()==='exp'?'exp':'other'}">${e.type}</span></td>
+      <td><span class="type-badge ${typeCls}">${e.type}</span></td>
       <td><span class="${e.mode==='Cash'?'mode-cash':'mode-bank'}">${e.mode}</span></td>
       <td class="num td-dr">${e.debit>0?fmtNum(e.debit):'—'}</td>
       <td class="num td-cr">${e.credit>0?fmtNum(e.credit):'—'}</td>
@@ -836,23 +846,25 @@ function renderDashboard(){
   }).join('');
 }
 
-/* ══════════════════════════════════════════
-   MC GRID
-══════════════════════════════════════════ */
+/* ── MC GRID ── */
 function renderMCGrid(){
-  const month = document.getElementById('mcMonth').value;
-  document.getElementById('mcMonthLabel').textContent = month || 'Select Month';
+  const month = (document.getElementById('mcMonth')||{}).value || '';
+  const lbl = document.getElementById('mcMonthLabel');
+  if(lbl) lbl.textContent = month || 'Select Month';
   const mc = mcStatus[month] || {};
   const tbody = document.getElementById('mcGrid');
+  if(!tbody) return;
 
-  tbody.innerHTML = FLOORS.map(floor=>{
-    const cells = floor.flats.map(flat=>{
+  tbody.innerHTML = FLOORS.map(floor => {
+    const cells = floor.flats.map(flat => {
       const status = mc[flat] || 'defaulter';
       const cls = status==='paid'?'flat-paid':status==='reminder'?'flat-reminder':'flat-defaulter';
-      const clickable = currentRole==='admin' ? `onclick="toggleFlat('${flat}','${month}')"` : 'title="View only — contact Treasurer to update"';
-      return `<td><button class="flat-btn ${cls}" ${clickable} style="${currentRole!=='admin'?'cursor:default;opacity:.85':''}">${flat}</button></td>`;
+      const clickAttr = currentRole==='admin'
+        ? `onclick="toggleFlat('${flat}','${month}')"`
+        : `title="View only — contact Treasurer"`;
+      const cursor = currentRole!=='admin' ? 'cursor:default;opacity:.9' : '';
+      return `<td><button class="flat-btn ${cls}" ${clickAttr} style="${cursor}">${flat}</button></td>`;
     });
-    // pad to 7 columns
     while(cells.length < 7) cells.push('<td><span class="flat-btn flat-na">—</span></td>');
     return `<tr><td>${floor.name}</td>${cells.join('')}</tr>`;
   }).join('');
@@ -862,82 +874,84 @@ function renderMCGrid(){
 }
 
 function toggleFlat(flat, month){
-  if(!month){ showToast('⚠️ Please select a month first','error'); return; }
-  if(!mcStatus[month]) mcStatus[month]={};
-  const cur = mcStatus[month][flat] || 'defaulter';
+  if(!month){ showToast('⚠️ Select a month first','error'); return; }
+  if(!mcStatus[month]) mcStatus[month] = {};
+  const cur  = mcStatus[month][flat] || 'defaulter';
   const next = cur==='defaulter'?'reminder':cur==='reminder'?'paid':'defaulter';
   mcStatus[month][flat] = next;
   saveMC();
   renderMCGrid();
+  const labels = {paid:'🟢 Paid',reminder:'🟡 Reminder sent',defaulter:'🔴 Defaulter'};
+  showToast(`${labels[next]} — Flat ${flat}`,'success');
 }
 
 function markAll(status){
-  const month = document.getElementById('mcMonth').value;
+  const month = (document.getElementById('mcMonth')||{}).value;
   if(!month){ showToast('⚠️ Select a month first','error'); return; }
-  if(!mcStatus[month]) mcStatus[month]={};
-  const allFlats = FLOORS.flatMap(f=>f.flats);
-  allFlats.forEach(f=>{ if(f!=='—') mcStatus[month][f]=status; });
+  if(!mcStatus[month]) mcStatus[month] = {};
+  FLOORS.flatMap(f=>f.flats).forEach(f => { mcStatus[month][f] = status; });
   saveMC(); renderMCGrid();
   showToast(`✅ All flats marked as ${status}`,'success');
 }
 
 function resetMC(){
-  const month = document.getElementById('mcMonth').value;
+  const month = (document.getElementById('mcMonth')||{}).value;
   if(!month){ showToast('⚠️ Select a month first','error'); return; }
   if(confirm(`Reset all MC status for ${month}?`)){
     delete mcStatus[month]; saveMC(); renderMCGrid();
-    showToast('↺ MC status reset','success');
+    showToast('↺ MC status reset');
   }
 }
 
 function updateMCSummary(month, mc){
-  const paid = Object.values(mc).filter(v=>v==='paid').length;
-  const total = 34;
-  const pending = total - paid;
-  document.getElementById('mcCollected').textContent = fmtRs(paid*1500);
-  document.getElementById('mcCollectedFlats').textContent = `${paid} flats`;
-  document.getElementById('mcPending').textContent = fmtRs(pending*1500);
-  document.getElementById('mcPendingFlats').textContent = `${pending} flats`;
-
-  document.getElementById('statPaid').textContent = paid;
-  document.getElementById('statReminder').textContent = Object.values(mc).filter(v=>v==='reminder').length;
-  document.getElementById('statDefault').textContent = Object.values(mc).filter(v=>v==='defaulter').length;
+  const paid    = Object.values(mc).filter(v=>v==='paid').length;
+  const pending = 34 - paid;
+  const mc_c = document.getElementById('mcCollected');
+  const mc_cf= document.getElementById('mcCollectedFlats');
+  const mc_p = document.getElementById('mcPending');
+  const mc_pf= document.getElementById('mcPendingFlats');
+  if(mc_c)  mc_c.textContent  = fmtRs(paid*1500);
+  if(mc_cf) mc_cf.textContent = `${paid} flats`;
+  if(mc_p)  mc_p.textContent  = fmtRs(pending*1500);
+  if(mc_pf) mc_pf.textContent = `${pending} flats`;
+  const sp=document.getElementById('statPaid'),sr=document.getElementById('statReminder'),sd=document.getElementById('statDefault');
+  if(sp) sp.textContent = paid;
+  if(sr) sr.textContent = Object.values(mc).filter(v=>v==='reminder').length;
+  if(sd) sd.textContent = Object.values(mc).filter(v=>v==='defaulter').length;
 }
 
 function updateDefaulterList(month, mc){
-  const defaulters = Object.entries(mc).filter(([,v])=>v==='defaulter'||v==='reminder').map(([k,v])=>`${k}(${v==='reminder'?'🟡':'🔴'})`);
   const el = document.getElementById('defaulterList');
-  if(!month){ el.textContent='Select a month in MC Status to see defaulters.'; return; }
-  el.textContent = defaulters.length ? defaulters.join(', ') : '✅ All flats paid for '+month;
+  if(!el) return;
+  if(!month){ el.textContent='Select a month to see defaulter list.'; return; }
+  const defaulters = Object.entries(mc)
+    .filter(([,v])=>v==='defaulter'||v==='reminder')
+    .map(([k,v])=>`${k}(${v==='reminder'?'🟡':'🔴'})`);
+  el.textContent = defaulters.length ? defaulters.join('  ·  ') : `✅ All flats paid for ${month}`;
 }
 
 function saveMC(){ localStorage.setItem('arwa_mc_2627', JSON.stringify(mcStatus)); }
+function saveEntries(){ localStorage.setItem('arwa_entries_2627', JSON.stringify(entries)); }
 
-/* ══════════════════════════════════════════
-   DAY BOOK ENTRY
-══════════════════════════════════════════ */
-// Track which entry is being edited
-let editingId = null;
-
+/* ── ENTRY ADD / EDIT / UPDATE ── */
 function addEntry(){
-  const date   = document.getElementById('entDate').value;
-  const desc   = document.getElementById('entDesc').value.trim();
-  const type   = document.getElementById('entType').value;
-  const debit  = parseFloat(document.getElementById('entDebit').value)||0;
-  const credit = parseFloat(document.getElementById('entCredit').value)||0;
-  const mode   = document.getElementById('entMode').value;
-  const mc     = parseFloat(document.getElementById('entMC').value)||0;
-  const flat   = document.getElementById('entFlat').value;
-  const month  = document.getElementById('entMonth').value;
+  const date   = (document.getElementById('entDate')||{}).value   || '';
+  const desc   = ((document.getElementById('entDesc')||{}).value  || '').trim();
+  const type   = (document.getElementById('entType')||{}).value   || 'MC';
+  const debit  = parseFloat((document.getElementById('entDebit')||{}).value)  || 0;
+  const credit = parseFloat((document.getElementById('entCredit')||{}).value) || 0;
+  const mode   = (document.getElementById('entMode')||{}).value   || 'Cash';
+  const mc     = parseFloat((document.getElementById('entMC')||{}).value)     || 0;
+  const flat   = (document.getElementById('entFlat')||{}).value   || '';
+  const month  = (document.getElementById('entMonth')||{}).value  || '';
 
   if(!date){ showToast('⚠️ Please select a date','error'); return; }
   if(!desc){ showToast('⚠️ Please enter particulars','error'); return; }
   if(debit===0 && credit===0){ showToast('⚠️ Enter debit or credit amount','error'); return; }
 
   if(editingId){
-    // ── UPDATE existing entry ──
-    const idx = entries.findIndex(e=>e.id===editingId);
-    if(idx>-1){
+    const idx = entries.findIndex(e => e.id === editingId);
+    if(idx > -1){
       entries[idx] = { ...entries[idx], date, desc, type, debit, credit, mode, mc, flat, month };
       saveEntries();
       renderDashboard(); renderDayBook(); renderReport();
@@ -945,13 +959,7 @@ function addEntry(){
     }
     cancelEdit();
   } else {
-    // ── ADD new entry ──
-    const entry = {
-      id: Date.now().toString(),
-      date, desc, type, debit, credit, mode, mc, flat, month,
-      ts: Date.now()
-    };
-    entries.push(entry);
+    entries.push({ id: Date.now().toString(), date, desc, type, debit, credit, mode, mc, flat, month, ts: Date.now() });
     saveEntries();
     renderDashboard(); renderDayBook(); renderReport();
     clearForm();
@@ -960,31 +968,25 @@ function addEntry(){
 }
 
 function editEntry(id){
-  const e = entries.find(en=>en.id===id);
+  const e = entries.find(en => en.id === id);
   if(!e) return;
-
-  // Navigate to entry section
+  // Switch to entry section
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.nav-link').forEach(b=>b.classList.remove('active'));
   document.getElementById('sec-entry').classList.add('active');
-  document.querySelector('[onclick="showSection('entry')"]').classList.add('active');
-
-  // Populate form
-  document.getElementById('entDate').value   = e.date;
-  document.getElementById('entDesc').value   = e.desc;
-  document.getElementById('entType').value   = e.type;
-  document.getElementById('entDebit').value  = e.debit||'';
-  document.getElementById('entCredit').value = e.credit||'';
-  document.getElementById('entMode').value   = e.mode;
-  document.getElementById('entMC').value     = e.mc||1500;
-  document.getElementById('entFlat').value   = e.flat||'';
-  document.getElementById('entMonth').value  = e.month;
-
-  // Switch button to Update mode
+  const eb = document.querySelector('[onclick="showSection('entry')"]');
+  if(eb) eb.classList.add('active');
+  // Fill form
+  const setVal = (id,v) => { const el=document.getElementById(id); if(el) el.value=v||''; };
+  setVal('entDate',  e.date);   setVal('entDesc',  e.desc);
+  setVal('entType',  e.type);   setVal('entDebit', e.debit||'');
+  setVal('entCredit',e.credit||''); setVal('entMode', e.mode);
+  setVal('entMC',    e.mc||1500);   setVal('entFlat', e.flat||'');
+  setVal('entMonth', e.month);
   editingId = id;
   setEditMode(true);
   document.getElementById('entDate').scrollIntoView({behavior:'smooth', block:'center'});
-  showToast('✏️ Edit mode — make changes and click Update Entry');
+  showToast('✏️ Edit mode — update and click Update Entry');
 }
 
 function cancelEdit(){
@@ -998,48 +1000,24 @@ function setEditMode(on){
   const btn    = document.getElementById('entryBtn');
   const banner = document.getElementById('editingBanner');
   const title  = document.getElementById('entryPanelTitle');
-  if(on){
-    btn.textContent     = '💾 Update Entry';
-    btn.style.background= 'var(--amber)';
-    banner.style.display= 'flex';
-    title.textContent   = '✏️ Edit Day Book Entry';
-  } else {
-    btn.textContent     = '➕ Add Entry';
-    btn.style.background= '';
-    banner.style.display= 'none';
-    title.textContent   = '➕ Add Day Book Entry';
+  if(btn){
+    btn.textContent     = on ? '💾 Update Entry' : '➕ Add Entry';
+    btn.style.background= on ? 'var(--amber)'    : '';
   }
+  if(banner) banner.style.display = on ? 'flex' : 'none';
+  if(title)  title.textContent    = on ? '✏️ Edit Day Book Entry' : '➕ Add Day Book Entry';
 }
 
 function clearForm(){
-  document.getElementById('entDebit').value  = '';
-  document.getElementById('entCredit').value = '';
-  document.getElementById('entDesc').value   = '';
-  document.getElementById('entFlat').value   = '';
+  ['entDebit','entCredit','entDesc','entFlat'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value='';
+  });
   setTodayDate();
-}
-
-function quickMC(flats){
-  const amount = flats * 1500;
-  document.getElementById('entDesc').value = `MC ${document.getElementById('entMonth').value} — ${flats} Flats × ₹1,500`;
-  document.getElementById('entType').value = 'MC';
-  document.getElementById('entCredit').value = amount;
-  document.getElementById('entDebit').value = '';
-  document.getElementById('entMC').value = 1500;
-  showToast(`⚡ Quick fill: MC ${flats} flats = ₹${amount.toLocaleString('en-IN')}`);
-}
-
-function quickExp(desc, amount){
-  document.getElementById('entDesc').value = desc;
-  document.getElementById('entType').value = 'EXP';
-  document.getElementById('entDebit').value = amount || '';
-  document.getElementById('entCredit').value = '';
-  if(amount) showToast(`⚡ Quick fill: ${desc} = ₹${amount.toLocaleString('en-IN')}`);
 }
 
 function deleteEntry(id){
   if(confirm('Delete this entry?')){
-    entries = entries.filter(e=>e.id!==id);
+    entries = entries.filter(e => e.id !== id);
     saveEntries(); renderDashboard(); renderDayBook(); renderReport();
     showToast('🗑 Entry deleted');
   }
@@ -1052,97 +1030,105 @@ function clearAll(){
   }
 }
 
-function saveEntries(){ localStorage.setItem('arwa_entries_2627', JSON.stringify(entries)); }
+function quickMC(flats){
+  const amount = flats * 1500;
+  const mn = (document.getElementById('entMonth')||{}).value || '';
+  const el = document.getElementById('entDesc'); if(el) el.value=`MC ${mn} — ${flats} Flats × ₹1,500`;
+  const et = document.getElementById('entType');  if(et) et.value='MC';
+  const ec = document.getElementById('entCredit');if(ec) ec.value=amount;
+  const ed = document.getElementById('entDebit'); if(ed) ed.value='';
+  showToast(`⚡ Quick fill: MC ${flats} flats = ₹${amount.toLocaleString('en-IN')}`);
+}
 
-/* ══════════════════════════════════════════
-   DAY BOOK TABLE
-══════════════════════════════════════════ */
+function quickExp(desc, amount){
+  const el = document.getElementById('entDesc');  if(el) el.value=desc;
+  const et = document.getElementById('entType');  if(et) et.value='EXP';
+  const ed = document.getElementById('entDebit'); if(ed) ed.value=amount||'';
+  const ec = document.getElementById('entCredit');if(ec) ec.value='';
+  if(amount) showToast(`⚡ Quick fill: ${desc} = ₹${amount.toLocaleString('en-IN')}`);
+}
+
+/* ── DAY BOOK TABLE ── */
 function renderDayBook(){
-  const filterMonth = document.getElementById('filterMonth').value;
-  const filterType  = document.getElementById('filterType').value;
-  const search      = document.getElementById('searchEntry').value.toLowerCase();
+  const filterMonth = (document.getElementById('filterMonth')||{}).value || 'All';
+  const filterType  = (document.getElementById('filterType') ||{}).value || 'All';
+  const search      = ((document.getElementById('searchEntry')||{}).value||'').toLowerCase();
 
-  let filtered = [...entries].sort((a,b)=>a.date.localeCompare(b.date));
-
-  // Build running balances
-  let runCash=OPN_CASH, runBank=OPN_BANK;
-  filtered.forEach(e=>{
+  const sorted = [...entries].sort((a,b) => a.date.localeCompare(b.date));
+  let rc=OPN_CASH, rb=OPN_BANK;
+  sorted.forEach(e => {
     const dr=parseFloat(e.debit)||0, cr=parseFloat(e.credit)||0;
-    if(e.mode==='Cash') runCash+=cr-dr; else runBank+=cr-dr;
-    e._cash=runCash; e._bank=runBank;
+    if(e.mode==='Cash') rc+=cr-dr; else rb+=cr-dr;
+    e._cash=rc; e._bank=rb;
   });
 
-  // Filter
-  filtered = filtered.filter(e=>{
+  const filtered = sorted.filter(e => {
     if(filterMonth!=='All' && e.month!==filterMonth) return false;
-    if(filterType!=='All' && e.type!==filterType) return false;
+    if(filterType !=='All' && e.type !==filterType)  return false;
     if(search && !e.desc.toLowerCase().includes(search)) return false;
     return true;
   });
 
   const tbody = document.getElementById('dayBookTbody');
+  if(!tbody) return;
+
   if(filtered.length===0){
     tbody.innerHTML='<tr><td colspan="10"><div class="empty-state"><div class="es-icon">📭</div><p>No entries found.</p></div></td></tr>';
   } else {
-    tbody.innerHTML = filtered.map((e,i)=>{
+    tbody.innerHTML = filtered.map((e,i) => {
       const typeCls = e.type==='MC'?'type-mc':e.type==='EXP'?'type-exp':'type-other';
       return `<tr class="${i%2?'alt':''}">
-        <td style="color:var(--muted);font-size:12px">${i+1}</td>
+        <td style="color:var(--muted);font-size:11px">${i+1}</td>
         <td style="font-family:var(--ff-m);font-size:12px">${e.date}</td>
         <td>${e.desc}${e.flat?`<br><span style="font-size:11px;color:var(--muted)">Flat: ${e.flat} · ${e.month}</span>`:''}</td>
         <td><span class="type-badge ${typeCls}">${e.type}</span></td>
         <td><span class="${e.mode==='Cash'?'mode-cash':'mode-bank'}">${e.mode}</span></td>
-        <td class="num td-dr">${e.debit>0?fmtNum(e.debit):'—'}</td>
+        <td class="num td-dr">${e.debit >0?fmtNum(e.debit) :'—'}</td>
         <td class="num td-cr">${e.credit>0?fmtNum(e.credit):'—'}</td>
         <td class="num td-bal">${fmtRs(e._cash)}</td>
         <td class="num td-bal">${fmtRs(e._bank)}</td>
         <td style="white-space:nowrap">
           <button class="edit-btn" onclick="editEntry('${e.id}')" title="Edit">✏️</button>
-          <button class="del-btn" onclick="deleteEntry('${e.id}')" title="Delete">🗑</button>
+          <button class="del-btn"  onclick="deleteEntry('${e.id}')" title="Delete">🗑</button>
         </td>
       </tr>`;
     }).join('');
   }
 
-  // Footer
   const b = calcBalances();
-  document.getElementById('footerCash').textContent = fmtRs(b.cash);
-  document.getElementById('footerBank').textContent = fmtRs(b.bank);
-  document.getElementById('footerCount').textContent = entries.length;
+  const fc=document.getElementById('footerCash'), fb=document.getElementById('footerBank'), fn=document.getElementById('footerCount');
+  if(fc) fc.textContent = fmtRs(b.cash);
+  if(fb) fb.textContent = fmtRs(b.bank);
+  if(fn) fn.textContent = entries.length;
 }
 
-/* ══════════════════════════════════════════
-   REPORT
-══════════════════════════════════════════ */
+/* ── REPORT ── */
 function renderReport(){
   const tbody = document.getElementById('reportTbody');
+  if(!tbody) return;
   if(entries.length===0){
-    tbody.innerHTML='<tr><td colspan="7"><div class="empty-state"><div class="es-icon">📊</div><p>Add entries to generate reports.</p></div></td></tr>';
+    tbody.innerHTML='<tr><td colspan="7"><div class="empty-state"><div class="es-icon">📊</div><p>Add entries in Day Book to generate reports.</p></div></td></tr>';
     return;
   }
-
-  let runCash=OPN_CASH, runBank=OPN_BANK;
   const sorted = [...entries].sort((a,b)=>a.date.localeCompare(b.date));
-
+  let rc=OPN_CASH, rb=OPN_BANK;
   const monthData={};
-  MONTHS.forEach(m=>{ monthData[m]={col:0,exp:0,endCash:OPN_CASH,endBank:OPN_BANK}; });
-
-  sorted.forEach(e=>{
+  MONTHS.forEach(m => monthData[m]={col:0,exp:0,endCash:OPN_CASH,endBank:OPN_BANK});
+  sorted.forEach(e => {
     const dr=parseFloat(e.debit)||0, cr=parseFloat(e.credit)||0;
-    if(e.mode==='Cash') runCash+=cr-dr; else runBank+=cr-dr;
+    if(e.mode==='Cash') rc+=cr-dr; else rb+=cr-dr;
     if(monthData[e.month]){
-      monthData[e.month].col+=cr;
-      monthData[e.month].exp+=dr;
-      monthData[e.month].endCash=runCash;
-      monthData[e.month].endBank=runBank;
+      monthData[e.month].col    += cr;
+      monthData[e.month].exp    += dr;
+      monthData[e.month].endCash = rc;
+      monthData[e.month].endBank = rb;
     }
   });
-
-  tbody.innerHTML = MONTHS.map((m,i)=>{
-    const d = monthData[m];
+  const rows = MONTHS.map((m,i) => {
+    const d  = monthData[m];
     if(d.col===0 && d.exp===0) return '';
-    const mc = mcStatus[m]||{};
-    const paid=Object.values(mc).filter(v=>v==='paid').length;
+    const mc   = mcStatus[m] || {};
+    const paid = Object.values(mc).filter(v=>v==='paid').length;
     return `<tr class="${i%2?'alt':''}">
       <td style="font-weight:600;color:var(--navy)">${m}</td>
       <td class="num td-cr">${d.col>0?fmtNum(d.col):'—'}</td>
@@ -1152,132 +1138,133 @@ function renderReport(){
       <td class="num td-bal">${fmtRs(d.endBank)}</td>
       <td><span class="type-badge ${paid===34?'type-mc':paid>0?'type-other':'type-exp'}">${paid}/34 Paid</span></td>
     </tr>`;
-  }).filter(Boolean).join('') || '<tr><td colspan="7"><div class="empty-state"><p>No data yet.</p></div></td></tr>';
+  }).filter(Boolean).join('');
+  tbody.innerHTML = rows || '<tr><td colspan="7"><div class="empty-state"><p>No data yet.</p></div></td></tr>';
 }
 
-/* ══════════════════════════════════════════
-   WHATSAPP
-══════════════════════════════════════════ */
+/* ── WHATSAPP ── */
 function buildWAFlatBtns(){
-  const allFlats = FLOORS.flatMap(f=>f.flats);
-  document.getElementById('waFlatBtns').innerHTML = allFlats.map(f=>
+  const el = document.getElementById('waFlatBtns');
+  if(!el) return;
+  el.innerHTML = FLOORS.flatMap(f=>f.flats).map(f =>
     `<button class="btn btn-outline btn-sm" onclick="selectWAFlat('${f}',this)">${f}</button>`
   ).join('');
 }
 
 function selectWAFlat(flat, btn){
   selectedWAFlat = flat;
-  document.querySelectorAll('#waFlatBtns button').forEach(b=>b.style.background='');
-  btn.style.background='var(--navy3)';
-  btn.style.borderColor='var(--navy2)';
+  document.querySelectorAll('#waFlatBtns button').forEach(b => { b.style.background=''; b.style.borderColor=''; });
+  btn.style.background   = 'var(--navy3)';
+  btn.style.borderColor  = 'var(--navy2)';
 }
 
 function getWAMessage(){
-  const action = document.getElementById('waAction').value;
-  const month  = document.getElementById('waMonth').value;
+  const action = (document.getElementById('waAction')||{}).value  || '';
+  const month  = (document.getElementById('waMonth') ||{}).value  || '';
   const flat   = selectedWAFlat || 'your flat';
   const msgs = {
-    reminder: `🏢 *Apple Residency Welfare Association*\n📍 K.K.Nagar, Tiruchirapalli – 620021\n\nDear Flat Owner (${flat}),\n\n📢 This is a gentle reminder that your *Monthly Maintenance Contribution (MC)* of ₹1,500 for *${month}* is due.\n\nPlease pay at the earliest to ensure smooth operations.\n\n💳 Pay via:\n• GPay / UPI to Treasurer\n• Cash to Association office\n\nThank you for your cooperation 🙏\n\n_Apple Residency WA Committee_`,
-    thanks:    `🏢 *Apple Residency Welfare Association*\n\nDear Resident (${flat}),\n\n🙏 Thank you for paying your MC for *${month}*!\n\nYour timely payment helps us maintain our community. 🌟\n\n_Apple Residency WA Committee_`,
-    default:   `🏢 *Apple Residency Welfare Association*\n📍 Tiruchirapalli – 620021\n\nDear Flat Owner (${flat}),\n\n⚠️ *FINAL NOTICE*\n\nYour Monthly Contribution for *${month}* of ₹1,500 is still pending.\n\nPlease pay immediately to avoid inconvenience.\n\nFor queries, contact the Secretary.\n\n_Apple Residency WA Committee_`,
-    meeting:   `🏢 *Apple Residency Welfare Association*\n\nDear All Residents,\n\n📅 *Committee Meeting Notice*\n\nA meeting is scheduled for all flat owners.\nPlease check the notice board for date and time.\n\nYour attendance is requested.\n\n_Apple Residency WA Committee_`,
-    custom:    `🏢 *Apple Residency Welfare Association*\n\nDear Resident (${flat}),\n\n[Your custom message here]\n\n_Apple Residency WA Committee_`,
+    reminder:`🏢 *Apple Residency Welfare Association*
+📍 K.K.Nagar, Tiruchirapalli – 620021
+
+Dear Flat Owner (${flat}),
+
+📢 Gentle reminder: Your MC of ₹1,500 for *${month}* is due.
+
+Pay via GPay/UPI or cash to Treasurer.
+
+Thank you 🙏
+_ARWA Committee_`,
+    thanks:  `🏢 *Apple Residency WA*
+
+Dear Resident (${flat}),
+
+🙏 Thank you for paying MC for *${month}*! 🌟
+
+_ARWA Committee_`,
+    default: `🏢 *Apple Residency WA*
+
+⚠️ FINAL NOTICE
+
+Flat ${flat} — MC for *${month}* is still pending.
+
+Please pay immediately.
+
+_ARWA Committee_`,
+    meeting: `🏢 *Apple Residency WA*
+
+📅 Committee Meeting Notice
+
+All flat owners — Meeting scheduled. Check notice board for details.
+
+_ARWA Committee_`,
+    custom:  `🏢 *Apple Residency WA*
+
+Dear Resident (${flat}),
+
+[Your message here]
+
+_ARWA Committee_`,
   };
   return msgs[action] || '';
 }
 
 function previewWA(){
-  const msg = getWAMessage();
+  const msg     = getWAMessage();
   const preview = document.getElementById('waPreview');
+  if(!preview) return;
   if(!msg){ preview.style.display='none'; showToast('⚠️ Select an action first','error'); return; }
-  preview.textContent = msg;
-  preview.style.display='block';
+  preview.textContent   = msg;
+  preview.style.display = 'block';
 }
 
 function sendWA(){
-  const msg = getWAMessage();
+  const msg   = getWAMessage();
   if(!msg){ showToast('⚠️ Select an action first','error'); return; }
-  const phone = document.getElementById('assocPhone').value.replace(/\D/g,'');
-  const url = phone
-    ? `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`
-    : `https://wa.me/?text=${encodeURIComponent(msg)}`;
-  window.open(url,'_blank');
+  const phone = (document.getElementById('assocPhone').value||'').replace(/\D/g,'');
+  window.open(`https://wa.me/${phone||''}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
 function savePhone(){
   assocPhone = document.getElementById('assocPhone').value;
   localStorage.setItem('arwa_phone', assocPhone);
-  document.getElementById('phoneSaved').textContent = '✅ Saved';
-  setTimeout(()=>{ document.getElementById('phoneSaved').textContent=''; },2000);
+  const sp = document.getElementById('phoneSaved');
+  if(sp){ sp.textContent='✅ Saved'; setTimeout(()=>{ sp.textContent=''; },2000); }
 }
 
-/* ══════════════════════════════════════════
-   EXCEL EXPORT
-══════════════════════════════════════════ */
+/* ── EXCEL EXPORT ── */
 function exportExcel(){
-  if(entries.length===0){ showToast('⚠️ No entries to export','error'); return; }
-
+  if(!entries.length){ showToast('⚠️ No entries to export','error'); return; }
   const sorted = [...entries].sort((a,b)=>a.date.localeCompare(b.date));
-  let runCash=OPN_CASH, runBank=OPN_BANK;
-
-  const rows = sorted.map((e,i)=>{
+  let rc=OPN_CASH, rb=OPN_BANK;
+  const rows = sorted.map((e,i) => {
     const dr=parseFloat(e.debit)||0, cr=parseFloat(e.credit)||0;
-    if(e.mode==='Cash') runCash+=cr-dr; else runBank+=cr-dr;
-    return {
-      '#': i+1,
-      'Date': e.date,
-      'Particulars': e.desc,
-      'Type': e.type,
-      'Mode': e.mode,
-      'Flat': e.flat,
-      'Month': e.month,
-      'Debit (₹)': dr||'',
-      'Credit (₹)': cr||'',
-      'Cash Balance': Math.round(runCash),
-      'Bank Balance': Math.round(runBank),
-      'Total Balance': Math.round(runCash+runBank),
-    };
+    if(e.mode==='Cash') rc+=cr-dr; else rb+=cr-dr;
+    return {'#':i+1,'Date':e.date,'Particulars':e.desc,'Type':e.type,'Mode':e.mode,
+            'Flat':e.flat,'Month':e.month,'Debit':dr||'','Credit':cr||'',
+            'Cash Bal':Math.round(rc),'Bank Bal':Math.round(rb),'Total':Math.round(rc+rb)};
   });
-
   const ws = XLSX.utils.json_to_sheet(rows);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Day Book FY 2026-27');
-  XLSX.writeFile(wb, 'AppleResidency_DayBook_FY2026-27.xlsx');
-  showToast('📥 Excel exported successfully','success');
+  XLSX.writeFile(wb, 'ARWA_DayBook_FY2026-27.xlsx');
+  showToast('📥 Excel exported!','success');
 }
 
 function exportReport(){
-  const rows = MONTHS.map(m=>{
-    const monthEntries = entries.filter(e=>e.month===m);
-    const col = monthEntries.reduce((s,e)=>s+(parseFloat(e.credit)||0),0);
-    const exp = monthEntries.reduce((s,e)=>s+(parseFloat(e.debit)||0),0);
+  const rows = MONTHS.map(m => {
+    const me  = entries.filter(e=>e.month===m);
+    const col = me.reduce((s,e)=>s+(parseFloat(e.credit)||0),0);
+    const exp = me.reduce((s,e)=>s+(parseFloat(e.debit) ||0),0);
     const mc  = mcStatus[m]||{};
-    const paid= Object.values(mc).filter(v=>v==='paid').length;
-    return { 'Month':m, 'Collections (₹)':col||'', 'Expenses (₹)':exp||'', 'Net (₹)':col-exp||'', 'MC Paid':paid+'/34' };
-  }).filter(r=>r['Collections (₹)']||r['Expenses (₹)']);
-
-  if(rows.length===0){ showToast('⚠️ No data to export','error'); return; }
-  const ws = XLSX.utils.json_to_sheet(rows);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Summary Report');
-  XLSX.writeFile(wb, 'AppleResidency_Report_FY2026-27.xlsx');
-  showToast('📋 Report exported','success');
+    return {'Month':m,'Collections':col||'','Expenses':exp||'','Net':col-exp||'',
+            'MC Paid':Object.values(mc).filter(v=>v==='paid').length+'/34'};
+  }).filter(r=>r.Collections||r.Expenses);
+  if(!rows.length){ showToast('⚠️ No data to export','error'); return; }
+  const ws=XLSX.utils.json_to_sheet(rows), wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Summary');
+  XLSX.writeFile(wb,'ARWA_Report_FY2026-27.xlsx');
+  showToast('📋 Report exported!','success');
 }
-
-/* ══════════════════════════════════════════
-   TOAST
-══════════════════════════════════════════ */
-function showToast(msg, type=''){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'show' + (type?' toast-'+type:'');
-  clearTimeout(t._timer);
-  t._timer = setTimeout(()=>{ t.className=''; },3000);
-}
-
-/* ══════════════════════════════════════════
-   FOOTER
-══════════════════════════════════════════ */
 
 }); // end DOMContentLoaded
 </script>
