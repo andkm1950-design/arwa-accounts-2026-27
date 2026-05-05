@@ -757,8 +757,11 @@ function applyRole(){
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
     document.getElementById('sec-mc').classList.add('active');
-    const mcBtn = document.querySelector('[onclick="showSection('mc')"]');
-    if(mcBtn) mcBtn.classList.add('active');
+    // activate MC nav button for viewer
+    document.querySelectorAll('.nav-link').forEach(b => {
+      if(b.getAttribute('onclick') && b.getAttribute('onclick').includes("'mc'")) 
+        b.classList.add('active');
+    });
   }
 }
 
@@ -974,8 +977,10 @@ function editEntry(id){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.nav-link').forEach(b=>b.classList.remove('active'));
   document.getElementById('sec-entry').classList.add('active');
-  const eb = document.querySelector('[onclick="showSection('entry')"]');
-  if(eb) eb.classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(b => {
+    if(b.getAttribute('onclick') && b.getAttribute('onclick').includes("'entry'"))
+      b.classList.add('active');
+  });
   // Fill form
   const setVal = (id,v) => { const el=document.getElementById(id); if(el) el.value=v||''; };
   setVal('entDate',  e.date);   setVal('entDesc',  e.desc);
