@@ -2,577 +2,1005 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ARWA Day Book</title>
-
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Apple Residency WA — Accounts FY 2026-27 v1.01</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
- --navy:#0d1f3c;
- --gold:#c9933a;
- --green:#16a34a;
- --red:#dc2626;
- --cream:#faf8f3;
- --border:#ddd;
+  --navy:#0d1f3c;--navy2:#1a3560;--navy3:#e8eef8;
+  --gold:#c9933a;--gold2:#f0b429;
+  --green:#16a34a;--green-l:#dcfce7;--green-d:#166534;
+  --red:#dc2626;--red-l:#fee2e2;
+  --amber:#d97706;--amber-l:#fef3c7;
+  --teal:#0891b2;--teal-l:#e0f2fe;
+  --cream:#faf8f3;--border:#e2d9c8;--muted:#6b7280;
+  --shadow:0 2px 12px rgba(13,31,60,.08);
+  --ff-h:'Playfair Display',Georgia,serif;
+  --ff-b:'DM Sans',system-ui,sans-serif;
+  --ff-m:'DM Mono',monospace;
 }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--ff-b);background:var(--cream);color:#1a1208;min-height:100vh}
+button,input,select{font-family:var(--ff-b);cursor:pointer}
 
-*{
- box-sizing:border-box;
- margin:0;
- padding:0;
-}
+/* LOGIN */
+#loginOverlay{position:fixed;inset:0;z-index:9999;background:var(--navy);display:flex;align-items:center;justify-content:center}
+.lbox{background:#fff;border-radius:16px;padding:36px 32px;width:min(400px,92vw);display:flex;flex-direction:column;align-items:center;gap:16px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.l-emb{width:60px;height:60px;border-radius:50%;background:var(--gold2);display:flex;align-items:center;justify-content:center;font-family:var(--ff-h);font-size:22px;font-weight:900;color:var(--navy)}
+.l-title{font-family:var(--ff-h);font-size:20px;color:var(--navy);text-align:center}
+.l-sub{font-size:12px;color:var(--muted);text-align:center;line-height:1.7}
+.l-fld{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;outline:none;transition:border-color .2s}
+.l-fld:focus{border-color:var(--gold)}
+.l-btn{width:100%;padding:12px;background:var(--navy);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;transition:background .2s}
+.l-btn:hover{background:var(--navy2)}
+.l-err{color:var(--red);font-size:13px;display:none;text-align:center}
+.cred-tbl{width:100%;border-collapse:collapse;font-size:12px;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.cred-tbl th{background:var(--navy);color:#fff;padding:6px 10px;text-align:left;font-size:11px}
+.cred-tbl td{padding:6px 10px;border-bottom:1px solid var(--border)}
+.cred-tbl tr:last-child td{border:none}
+.cv{font-family:var(--ff-m);background:var(--navy3);padding:1px 6px;border-radius:4px;font-size:11px;color:var(--navy)}
 
-body{
- font-family:Arial,sans-serif;
- background:var(--cream);
- color:#111;
-}
+/* BANNER */
+.banner{background:linear-gradient(135deg,var(--navy),var(--navy2));position:relative;overflow:hidden}
+.banner::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(201,147,58,.05) 40px,rgba(201,147,58,.05) 41px)}
+.b-inner{max-width:1100px;margin:0 auto;padding:22px 20px;position:relative;z-index:1;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.b-emb{width:52px;height:52px;border-radius:50%;background:var(--gold2);display:flex;align-items:center;justify-content:center;font-family:var(--ff-h);font-size:20px;font-weight:900;color:var(--navy);flex-shrink:0}
+.b-text h1{font-family:var(--ff-h);font-size:clamp(16px,3vw,22px);color:#fff;line-height:1.2}
+.b-text p{font-size:12px;color:rgba(255,255,255,.55);margin-top:3px}
+.b-ver{margin-left:auto;background:rgba(201,147,58,.2);border:1px solid rgba(201,147,58,.4);color:var(--gold2);font-family:var(--ff-m);font-size:11px;padding:5px 12px;border-radius:99px}
 
-header{
- background:var(--navy);
- color:#fff;
- padding:15px;
- text-align:center;
-}
+/* NAVBAR */
+.navbar{background:var(--navy2);position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.nav-inner{max-width:1100px;margin:0 auto;padding:0 16px;display:flex;align-items:center;overflow-x:auto;scrollbar-width:none}
+.nav-inner::-webkit-scrollbar{display:none}
+.nb{font-size:13px;font-weight:500;color:rgba(255,255,255,.6);padding:13px 14px;border:none;border-bottom:3px solid transparent;background:none;white-space:nowrap;transition:all .2s}
+.nb:hover,.nb.active{color:var(--gold2);border-bottom-color:var(--gold2)}
+#roleBadge{font-size:11px;padding:13px 8px;color:rgba(255,255,255,.4);margin-left:auto;white-space:nowrap}
+.lout{font-size:12px;color:rgba(255,255,255,.35);padding:13px 10px;border:none;background:none;white-space:nowrap}
+.lout:hover{color:#fca5a5}
 
-main{
- max-width:1200px;
- margin:auto;
- padding:20px;
-}
+/* MAIN */
+main{max-width:1100px;margin:0 auto;padding:18px}
+.sec{display:none}.sec.active{display:block}
 
-.panel{
- background:#fff;
- border:1px solid var(--border);
- border-radius:10px;
- padding:20px;
- margin-bottom:20px;
-}
+/* CARDS */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:11px;margin-bottom:18px}
+.card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:13px;border-left:4px solid transparent;box-shadow:var(--shadow)}
+.c-lbl{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.c-val{font-family:var(--ff-m);font-size:20px;font-weight:500;color:var(--navy)}
+.c-sub{font-size:11px;color:var(--muted);margin-top:3px}
 
-.p-title{
- font-size:20px;
- margin-bottom:20px;
- color:var(--navy);
- font-weight:bold;
-}
+/* PANEL */
+.panel{background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px;box-shadow:var(--shadow);margin-bottom:18px}
+.p-title{font-family:var(--ff-h);font-size:16px;color:var(--navy);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.p-title::after{content:'';flex:1;height:1px;background:var(--border)}
 
-.fgrid{
- display:grid;
- grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
- gap:12px;
-}
+/* FORM */
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:9px;align-items:end}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.fg input,.fg select{padding:9px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;outline:none;transition:border-color .2s;background:#fff}
+.fg input:focus,.fg select:focus{border-color:var(--gold)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 15px;border-radius:7px;font-size:13px;font-weight:600;border:none;transition:all .2s}
+.bn{background:var(--navy);color:#fff}.bn:hover{background:var(--navy2)}
+.ba{background:var(--amber);color:#fff}.ba:hover{background:#b45309}
+.bg{background:var(--green);color:#fff}.bg:hover{background:#15803d}
+.bo{background:#fff;color:var(--navy);border:1.5px solid var(--border)}.bo:hover{border-color:var(--navy);background:var(--navy3)}
+.bgo{background:var(--gold);color:#fff}.bgo:hover{background:#a97520}
+.br{background:var(--red);color:#fff}
+.bsm{padding:6px 10px;font-size:12px}
 
-.fg{
- display:flex;
- flex-direction:column;
- gap:5px;
-}
+/* EDIT BANNER */
+.edit-ban{background:var(--amber-l);border:1px solid var(--amber);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#92400e;display:none;align-items:center;gap:8px;flex-wrap:wrap}
+.can-btn{margin-left:auto;background:none;border:1px solid var(--amber);color:var(--amber);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600}
+.can-btn:hover{background:var(--amber);color:#fff}
 
-.fg label{
- font-size:13px;
- font-weight:bold;
-}
+/* MC TABLE — 8 cols x 6 rows with full borders */
+.mc-wrap{overflow-x:auto}
+.mc-tbl{width:100%;border-collapse:collapse;border:2px solid var(--navy);font-size:13px;min-width:580px}
+.mc-tbl th{background:var(--navy);color:#fff;padding:9px 6px;text-align:center;font-size:11.5px;font-weight:600;letter-spacing:.04em;border:1px solid rgba(255,255,255,.15)}
+.mc-tbl th:first-child{text-align:left;padding-left:12px;min-width:85px}
+.mc-tbl td{border:2px solid #bbb;padding:5px 3px;text-align:center;vertical-align:middle}
+.mc-tbl td:first-child{text-align:left;font-weight:600;color:var(--navy2);background:var(--navy3);padding-left:10px;font-size:12px;border-left:2px solid var(--navy);white-space:nowrap}
+.fc{display:inline-block;width:100%;padding:6px 2px;border-radius:5px;font-weight:700;font-size:12.5px;border:none;transition:all .2s;min-width:46px}
+.fp{background:var(--green-l);color:var(--green-d);border:1px solid #86efac}
+.fr{background:var(--amber-l);color:#92400e;border:1px solid #fcd34d}
+.fd{background:var(--red-l);color:var(--red);border:1px solid #fca5a5}
+.fn{background:#f3f4f6;color:#9ca3af;font-size:11px}
 
-.fg input,
-.fg select{
- padding:10px;
- border:1px solid var(--border);
- border-radius:6px;
-}
+/* MC LEGEND */
+.mc-leg{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;font-size:13px;font-weight:500}
 
-.btn{
- border:none;
- padding:10px 15px;
- border-radius:6px;
- cursor:pointer;
- font-weight:bold;
-}
+/* DAY BOOK TABLE */
+.tblwrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border)}
+.dtbl{width:100%;border-collapse:collapse;font-size:12.5px;min-width:760px}
+.dtbl thead tr{background:var(--navy)}
+.dtbl thead th{padding:10px 10px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.85);white-space:nowrap}
+.dtbl thead th.r{text-align:right}
+.dtbl tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+.dtbl tbody tr:hover{background:#f5f0e8}
+.dtbl tbody tr.alt{background:var(--cream)}
+.dtbl tbody tr.ropn td{background:#e8eef8;font-weight:600;color:var(--navy2);font-style:italic}
+.dtbl tbody tr.rcls td{background:#fdf3d8;font-weight:700;color:#7a5a00}
+.dtbl tbody tr.ropn td{background:#e8eef8;font-weight:600;color:var(--navy2);font-style:italic}
+.dtbl tbody tr.rcls td{background:#fdf3d8;font-weight:700;color:#7a5a00}
+.dtbl tbody td{padding:9px 10px;vertical-align:middle}
+.dtbl tbody td.r{text-align:right;font-family:var(--ff-m);font-size:12px}
+.tdr{color:var(--red)}.tcr{color:var(--green);font-weight:600}.tbl{color:var(--navy);font-weight:700}
+.tmc{background:var(--green-l);color:var(--green-d);font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px}
+.tex{background:var(--red-l);color:var(--red);font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px}
+.tot{background:var(--navy3);color:var(--navy2);font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px}
+.mca{background:var(--amber-l);color:#92400e;font-size:10px;font-weight:600;padding:2px 6px;border-radius:99px}
+.mcb{background:var(--teal-l);color:var(--teal);font-size:10px;font-weight:600;padding:2px 6px;border-radius:99px}
+.ab{background:none;border:none;font-size:14px;padding:2px 3px;transition:opacity .2s}.ab:hover{opacity:.6}
 
-.bn{
- background:var(--navy);
- color:#fff;
-}
+/* FILTERS */
+.frow{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.fsel{padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;outline:none;background:#fff}
+.fsel:focus{border-color:var(--gold)}
+.fsrch{padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;outline:none;flex:1;min-width:140px}
+.fsrch:focus{border-color:var(--gold)}
 
-.ba{
- background:var(--gold);
- color:#fff;
-}
+/* QUICK BUTTONS */
+.qrow{margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+.qlbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px}
+.qbtns{display:flex;gap:6px;flex-wrap:wrap}
 
-.tblwrap{
- overflow:auto;
-}
+/* WA */
+.wasel{padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;outline:none;background:#fff;min-width:190px}
+.waprev{background:var(--green-l);border-left:4px solid var(--green);border-radius:8px;padding:13px 15px;font-size:13px;color:#166534;white-space:pre-line;display:none;margin:10px 0}
+.fwab{padding:5px 8px;border-radius:5px;border:1.5px solid var(--border);background:#fff;font-size:12px;font-weight:600;transition:all .2s}
+.fwab.sel{background:var(--navy3);border-color:var(--navy2);color:var(--navy)}
 
-table{
- width:100%;
- border-collapse:collapse;
-}
+/* REPORT */
+.rtbl{width:100%;border-collapse:collapse;font-size:13px}
+.rtbl thead tr{background:var(--navy2)}
+.rtbl thead th{padding:9px 11px;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.85);text-align:right}
+.rtbl thead th:first-child{text-align:left}
+.rtbl tbody tr{border-bottom:1px solid var(--border)}
+.rtbl tbody tr.alt{background:var(--cream)}
+.rtbl tbody td{padding:9px 11px;text-align:right;font-family:var(--ff-m);font-size:12px}
+.rtbl tbody td:first-child{text-align:left;font-family:var(--ff-b);font-weight:600;color:var(--navy)}
+.rtbl tfoot tr{background:var(--navy)}
+.rtbl tfoot td{padding:10px 11px;font-weight:700;font-family:var(--ff-m);font-size:13px;text-align:right;color:rgba(255,255,255,.8)}
+.rtbl tfoot td:first-child{font-family:var(--ff-b);color:#fff;text-align:left}
 
-th{
- background:var(--navy);
- color:#fff;
- padding:10px;
- font-size:12px;
-}
+/* EMPTY */
+.emp{text-align:center;padding:36px;color:var(--muted)}
+.emp-i{font-size:34px;margin-bottom:8px}
 
-td{
- border-bottom:1px solid #ddd;
- padding:10px;
- font-size:13px;
-}
+/* TOAST */
+#toast{position:fixed;bottom:18px;right:18px;z-index:9998;background:var(--navy);color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:500;transform:translateY(60px);opacity:0;transition:all .3s;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.25)}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.ok{background:var(--green)}
+#toast.err{background:var(--red)}
 
-tr:nth-child(even){
- background:#f9f9f9;
-}
-
-.r{
- text-align:right;
-}
-
-.ab{
- border:none;
- background:none;
- cursor:pointer;
- font-size:18px;
- margin-right:5px;
-}
-
-.cards{
- display:grid;
- grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
- gap:12px;
- margin-bottom:20px;
-}
-
-.card{
- background:#fff;
- border-radius:10px;
- padding:15px;
- border-left:5px solid var(--gold);
-}
-
-.c-lbl{
- font-size:12px;
- color:#666;
- margin-bottom:5px;
-}
-
-.c-val{
- font-size:22px;
- font-weight:bold;
- color:var(--navy);
-}
-
-#toast{
- position:fixed;
- bottom:20px;
- right:20px;
- background:var(--navy);
- color:#fff;
- padding:10px 15px;
- border-radius:6px;
- opacity:0;
- transition:.3s;
-}
-
-#toast.show{
- opacity:1;
-}
-
-.edit-ban{
- background:#fff3cd;
- padding:10px;
- margin-bottom:15px;
- border-radius:6px;
- display:none;
-}
-
-.login{
- max-width:400px;
- margin:50px auto;
- background:#fff;
- padding:25px;
- border-radius:10px;
- border:1px solid #ddd;
-}
-
-.login input{
- width:100%;
- margin-bottom:10px;
- padding:10px;
-}
-
-.hidden{
- display:none;
-}
+@media(max-width:600px){main{padding:10px}.fgrid{grid-template-columns:1fr 1fr}.cards{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
 
-<div id="loginPage" class="login">
-<h2 style="margin-bottom:20px">ARWA Login</h2>
-<input type="text" id="loginUser" placeholder="User ID">
-<input type="password" id="loginPass" placeholder="Password">
-<button class="btn bn" onclick="doLogin()" style="width:100%">Login</button>
-<p style="margin-top:15px;font-size:13px">
-Admin: admin / arwa_accounts_2026-2027<br><br>
-Viewer Password: arwa2627
-</p>
+<!-- LOGIN -->
+<div id="loginOverlay">
+  <div class="lbox">
+    <div class="l-emb">AR</div>
+    <div class="l-title">Apple Residency WA<br/>Accounts FY 2026-27</div>
+    <input class="l-fld" type="text"     id="loginUser" placeholder="User ID"  autocomplete="username"/>
+    <input class="l-fld" type="password" id="loginPass" placeholder="Password" autocomplete="current-password"/>
+    <div class="l-err" id="loginErr">Wrong credentials. Please try again.</div>
+    <button class="l-btn" onclick="doLogin()">Login</button>
+    <table class="cred-tbl">
+      <thead><tr><th>Role</th><th>User ID</th><th>Password</th></tr></thead>
+      <tbody>
+        <tr><td>Admin (Treasurer)</td><td><span class="cv">admin</span></td><td><span class="cv">arwa_accounts_2026-2027</span></td></tr>
+        <tr><td>Viewer (Members)</td><td><span class="cv">blank</span></td><td><span class="cv">arwa2627</span></td></tr>
+      </tbody>
+    </table>
+    <div style="font-size:11px;color:var(--muted);text-align:center">Apple Residency Welfare Association<br/>K.K.Nagar, Tiruchirapalli-620021 | v1.01</div>
+  </div>
 </div>
 
-<div id="app" class="hidden">
-<header>
-<h1>Apple Residency Welfare Association</h1>
-<p>Day Book FY 2026-27</p>
-</header>
+<!-- BANNER -->
+<div class="banner">
+  <div class="b-inner">
+    <div class="b-emb">AR</div>
+    <div class="b-text">
+      <h1>Apple Residency Welfare Association</h1>
+      <p>Financial Accounts | Budget Transparency | Azath Nagar 2nd St, K.K.Nagar, Tiruchirapalli-620021</p>
+    </div>
+    <div class="b-ver">v1.01 | FY 2026-27</div>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-inner">
+    <button class="nb active" id="nb-dashboard" onclick="showSec('dashboard',this)">Home</button>
+    <button class="nb"        id="nb-mc"        onclick="showSec('mc',this)">MC Status</button>
+    <button class="nb admin-only" id="nb-entry" onclick="showSec('entry',this)">Day Book</button>
+    <button class="nb admin-only" id="nb-wa"    onclick="showSec('wa',this)">Reminders</button>
+    <button class="nb"        id="nb-reports"   onclick="showSec('reports',this)">Reports</button>
+    <span id="roleBadge"></span>
+    <button class="lout" onclick="doLogout()">Logout</button>
+  </div>
+</nav>
 
 <main>
 
-<div class="cards">
-<div class="card">
-<div class="c-lbl">Cash Balance</div>
-<div class="c-val" id="s-cash">0</div>
+<!-- DASHBOARD -->
+<div id="sec-dashboard" class="sec active">
+  <div class="cards">
+    <div class="card" style="border-left-color:var(--green)">
+      <div class="c-lbl">Cash in Hand</div><div class="c-val" id="s-cash">0</div><div class="c-sub">Current</div>
+    </div>
+    <div class="card" style="border-left-color:var(--teal)">
+      <div class="c-lbl">Indian Bank SB</div><div class="c-val" id="s-bank">0</div><div class="c-sub">A/c balance</div>
+    </div>
+    <div class="card" style="border-left-color:var(--gold)">
+      <div class="c-lbl">Total Balance</div><div class="c-val" id="s-total">0</div><div class="c-sub">Cash+Bank</div>
+    </div>
+    <div class="card" style="border-left-color:var(--red)">
+      <div class="c-lbl">Total Expenses</div><div class="c-val" id="s-exp">0</div><div class="c-sub">This FY</div>
+    </div>
+    <div class="card" style="border-left-color:var(--green)">
+      <div class="c-lbl">MC Paid Apr 26</div><div class="c-val" id="s-paid" style="color:var(--green)">0</div><div class="c-sub">flats paid</div>
+    </div>
+    <div class="card" style="border-left-color:var(--red)">
+      <div class="c-lbl">Defaulters Apr 26</div><div class="c-val" id="s-def" style="color:var(--red)">0</div><div class="c-sub">not paid</div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="p-title">Recent Transactions</div>
+    <div class="tblwrap">
+      <table class="dtbl">
+        <thead><tr><th>Date</th><th>Particulars</th><th>Type</th><th>Mode</th>
+        <th class="r">Debit</th><th class="r">Credit</th><th class="r">Cash Bal</th><th class="r">Bank Bal</th></tr></thead>
+        <tbody id="rec-tb"></tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
-<div class="card">
-<div class="c-lbl">Bank Balance</div>
-<div class="c-val" id="s-bank">0</div>
+<!-- MC STATUS -->
+<div id="sec-mc" class="sec">
+  <div id="vbanner" style="display:none;background:var(--navy3);border:1px solid var(--navy2);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--navy2)">
+    Viewer Mode - MC Status is read-only. Contact Treasurer to update.
+  </div>
+  <div class="panel">
+    <div class="p-title">MC Status - <span id="mc-lbl">April 2026</span></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+      <select id="mc-sel" class="fsel" onchange="renderMC()">
+        <option>April 2026</option><option>May 2026</option><option>June 2026</option>
+        <option>July 2026</option><option>August 2026</option><option>September 2026</option>
+        <option>October 2026</option><option>November 2026</option><option>December 2026</option>
+        <option>January 2027</option><option>February 2027</option><option>March 2027</option>
+      </select>
+      <span id="mc-tip" style="font-size:12px;color:var(--muted)"></span>
+    </div>
+    <div class="mc-leg">
+      <span style="display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:16px;height:16px;border-radius:3px;background:var(--green-l);border:1px solid #86efac"></span>Green = Paid</span>
+      <span style="display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:16px;height:16px;border-radius:3px;background:var(--amber-l);border:1px solid #fcd34d"></span>Yellow = Reminder Sent</span>
+      <span style="display:flex;align-items:center;gap:6px"><span style="display:inline-block;width:16px;height:16px;border-radius:3px;background:var(--red-l);border:1px solid #fca5a5"></span>Red = Defaulter / Not Paid</span>
+    </div>
+    <!-- MC TABLE 8 COLS x 6 ROWS -->
+    <div class="mc-wrap">
+      <table class="mc-tbl">
+        <thead>
+          <tr>
+            <th>Floor</th>
+            <th>A-Type</th>
+            <th>B-Type</th>
+            <th>C-Type</th>
+            <th>D-Type</th>
+            <th>E-Type</th>
+            <th>F-Type</th>
+            <th>G-Type</th>
+          </tr>
+        </thead>
+        <tbody id="mc-tb"></tbody>
+      </table>
+    </div>
+    <!-- MC SUMMARY -->
+    <div class="cards" style="margin-top:14px;margin-bottom:0">
+      <div class="card" style="border-left-color:var(--green)">
+        <div class="c-lbl">Collected</div><div class="c-val" id="mc-col" style="color:var(--green)">0</div><div class="c-sub" id="mc-col-f">0 flats</div>
+      </div>
+      <div class="card" style="border-left-color:var(--red)">
+        <div class="c-lbl">Pending</div><div class="c-val" id="mc-pen" style="color:var(--red)">0</div><div class="c-sub" id="mc-pen-f">flats</div>
+      </div>
+      <div class="card" style="border-left-color:var(--red);grid-column:span 2">
+        <div class="c-lbl">Defaulter Flats</div><div class="c-val" id="mc-def" style="font-size:13px;color:var(--red);line-height:1.6">-</div>
+      </div>
+    </div>
+    <div class="admin-only" style="margin-top:12px;display:flex;gap:7px;flex-wrap:wrap">
+      <button class="btn bg bsm" onclick="markAll('paid')">Mark All Paid</button>
+      <button class="btn br bsm" onclick="markAll('defaulter')">Mark All Defaulter</button>
+      <button class="btn bo bsm" onclick="resetMC()">Reset Month</button>
+    </div>
+  </div>
 </div>
 
-<div class="card">
-<div class="c-lbl">Total Balance</div>
-<div class="c-val" id="s-total">0</div>
+<!-- DAY BOOK -->
+<div id="sec-entry" class="sec">
+  <div class="panel">
+    <div class="p-title" id="ep-title">Add Day Book Entry</div>
+    <div class="edit-ban" id="edit-ban">
+      Editing entry - make changes then click Update Entry
+      <button class="can-btn" onclick="cancelEdit()">Cancel</button>
+    </div>
+    <div class="fgrid">
+      <div class="fg"><label>Date</label><input type="date" id="e-date"/></div>
+      <div class="fg" style="grid-column:span 2"><label>Particulars</label><input type="text" id="e-desc" placeholder="e.g. MC April 2026 - A1 - Flat Owner Name"/></div>
+      <div class="fg"><label>Type</label>
+        <select id="e-type">
+          <option value="MC">MC Subscription</option>
+          <option value="EXP">Expense</option>
+          <option value="OTHER">Other Receipt</option>
+        </select>
+      </div>
+      <div class="fg"><label>Debit (Expense)</label><input type="number" id="e-dr" placeholder="0" min="0"/></div>
+      <div class="fg"><label>Credit (Income)</label><input type="number" id="e-cr" placeholder="0" min="0"/></div>
+      <div class="fg"><label>Mode</label>
+        <select id="e-mode">
+          <option value="Bank">Bank (GPay/UPI)</option>
+          <option value="Cash">Cash</option>
+        </select>
+      </div>
+      <div class="fg"><label>Flat No.</label>
+        <select id="e-flat">
+          <option value="">-- Select --</option>
+          <option>A1</option><option>A2</option><option>A3</option><option>A4</option><option>A5</option>
+          <option>B1</option><option>B2</option><option>B3</option><option>B4</option><option>B5</option>
+          <option>C1/D1</option><option>C2</option><option>C3</option><option>C4</option><option>C5</option>
+          <option>D2</option><option>D3</option><option>D4</option><option>D5</option>
+          <option>E1</option><option>E2</option><option>E3</option><option>E4</option><option>E5</option>
+          <option>F1</option><option>F2</option><option>F3</option><option>F4</option><option>F5</option>
+          <option>G1</option><option>G2</option><option>G3</option><option>G4</option><option>G5</option>
+        </select>
+      </div>
+      <div class="fg"><label>Month</label>
+        <select id="e-month">
+          <option>April 2026</option><option>May 2026</option><option>June 2026</option>
+          <option>July 2026</option><option>August 2026</option><option>September 2026</option>
+          <option>October 2026</option><option>November 2026</option><option>December 2026</option>
+          <option>January 2027</option><option>February 2027</option><option>March 2027</option>
+        </select>
+      </div>
+      <div class="fg" style="align-self:end">
+        <button class="btn bn" id="ent-btn" onclick="submitEntry()" style="width:100%;padding:10px">Add Entry</button>
+      </div>
+    </div>
+    <div class="qrow">
+      <div class="qlbl">Quick Fill</div>
+      <div class="qbtns">
+        <button class="btn bg bsm" onclick="qMC(34)">MC 34 Flats Rs.51,000</button>
+        <button class="btn bg bsm" onclick="qMC(33)">MC 33 Flats Rs.49,500</button>
+        <button class="btn bg bsm" onclick="qMC(32)">MC 32 Flats Rs.48,000</button>
+        <button class="btn bo bsm" onclick="qExp('Security Salary - Mr Purushothama Raju',24000)">Security Rs.24,000</button>
+        <button class="btn bo bsm" onclick="qExp('TNEB Common EB Bill',0)">TNEB EB Bill</button>
+        <button class="btn bo bsm" onclick="qExp('Septic Tank Cleaning - Ms Divya Manimaran',4200)">Septic Rs.4,200</button>
+        <button class="btn bo bsm" onclick="qExp('Housekeeping wages - Farose N',600)">Housekeeping Rs.600</button>
+        <button class="btn bo bsm" onclick="qExp('Garbage clearing - Mrs S Saranya',600)">Garbage Rs.600</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="p-title">Day Book - FY 2026-27</div>
+    <div class="frow">
+      <select class="fsel" id="f-mon" onchange="renderDB()">
+        <option value="All">All Months</option>
+        <option>April 2026</option><option>May 2026</option><option>June 2026</option>
+        <option>July 2026</option><option>August 2026</option><option>September 2026</option>
+        <option>October 2026</option><option>November 2026</option><option>December 2026</option>
+        <option>January 2027</option><option>February 2027</option><option>March 2027</option>
+      </select>
+      <select class="fsel" id="f-typ" onchange="renderDB()">
+        <option value="All">All Types</option>
+        <option value="MC">MC Only</option>
+        <option value="EXP">Expenses</option>
+        <option value="OTHER">Other</option>
+      </select>
+      <input class="fsrch" type="text" id="f-srch" placeholder="Search..." oninput="renderDB()"/>
+      <button class="btn bgo bsm" onclick="exportXL()">Export Excel</button>
+      <button class="btn bo bsm" onclick="clearAll()">Clear All</button>
+    </div>
+    <div class="tblwrap">
+      <table class="dtbl">
+        <thead><tr>
+          <th>#</th><th>Date</th><th>Particulars</th><th>Type</th><th>Mode</th>
+          <th class="r">Debit</th><th class="r">Credit</th>
+          <th class="r">Cash Bal</th><th class="r">Bank Bal</th>
+          <th>Act</th>
+        </tr></thead>
+        <tbody id="db-tb"></tbody>
+      </table>
+    </div>
+    <div style="margin-top:10px;display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted)">
+      Cash: <strong id="ft-c" style="color:var(--green)">0</strong>
+      Bank: <strong id="ft-b" style="color:var(--teal)">0</strong>
+      Entries: <strong id="ft-n">0</strong>
+    </div>
+  </div>
 </div>
 
-<div class="card">
-<div class="c-lbl">Expenses</div>
-<div class="c-val" id="s-exp">0</div>
-</div>
-</div>
-
-<div class="panel admin-only">
-<div class="p-title" id="formTitle">Add Entry</div>
-
-<div class="edit-ban" id="editBan">
-Editing Entry...
-<button class="btn ba" onclick="cancelEdit()">Cancel</button>
-</div>
-
-<div class="fgrid">
-
-<div class="fg">
-<label>Date</label>
-<input type="date" id="e-date">
-</div>
-
-<div class="fg">
-<label>Particulars</label>
-<input type="text" id="e-desc">
-</div>
-
-<div class="fg">
-<label>Type</label>
-<select id="e-type">
-<option value="MC">MC</option>
-<option value="EXP">Expense</option>
-<option value="OTHER">Other</option>
-</select>
-</div>
-
-<div class="fg">
-<label>Debit</label>
-<input type="number" id="e-dr">
-</div>
-
-<div class="fg">
-<label>Credit</label>
-<input type="number" id="e-cr">
+<!-- WHATSAPP -->
+<div id="sec-wa" class="sec">
+  <div class="panel">
+    <div class="p-title">WhatsApp Reminders</div>
+    <div style="display:flex;gap:9px;flex-wrap:wrap;margin-bottom:11px">
+      <select class="wasel" id="wa-act">
+        <option value="">-- Select Message --</option>
+        <option value="reminder">MC Reminder</option>
+        <option value="thanks">Thank You (Paid)</option>
+        <option value="final">Final Notice (Defaulter)</option>
+        <option value="meeting">Meeting Notice</option>
+      </select>
+      <select class="wasel" id="wa-mon" style="min-width:140px">
+        <option>April 2026</option><option>May 2026</option><option>June 2026</option>
+        <option>July 2026</option><option>August 2026</option><option>September 2026</option>
+        <option>October 2026</option><option>November 2026</option><option>December 2026</option>
+        <option>January 2027</option><option>February 2027</option><option>March 2027</option>
+      </select>
+    </div>
+    <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px">Select Flat</div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px" id="wa-flats"></div>
+    <div class="waprev" id="wa-prev"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn bg" onclick="sendWA()">Open WhatsApp</button>
+      <button class="btn bo" onclick="previewWA()">Preview</button>
+    </div>
+    <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px">Association WhatsApp No.</div>
+      <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
+        <input type="tel" id="wa-ph" class="l-fld" style="max-width:210px;padding:9px 12px;font-size:13px" placeholder="+91 XXXXX XXXXX"/>
+        <button class="btn bn bsm" onclick="savePhone()">Save</button>
+        <span id="ph-saved" style="font-size:12px;color:var(--green)"></span>
+      </div>
+    </div>
+    <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px">Current Defaulters</div>
+      <div id="wa-defs" style="font-size:13px;color:var(--muted)">Select month in MC Status first.</div>
+    </div>
+  </div>
 </div>
 
-<div class="fg">
-<label>Mode</label>
-<select id="e-mode">
-<option value="Bank">Bank</option>
-<option value="Cash">Cash</option>
-</select>
-</div>
-
-<div class="fg">
-<label>Flat</label>
-<input type="text" id="e-flat">
-</div>
-
-<div class="fg">
-<label>Month</label>
-<select id="e-month">
-<option>April 2026</option>
-<option>May 2026</option>
-<option>June 2026</option>
-<option>July 2026</option>
-<option>August 2026</option>
-<option>September 2026</option>
-<option>October 2026</option>
-<option>November 2026</option>
-<option>December 2026</option>
-<option>January 2027</option>
-<option>February 2027</option>
-<option>March 2027</option>
-</select>
-</div>
-
-<div class="fg">
-<label>&nbsp;</label>
-<button type="button" class="btn bn" id="saveBtn" onclick="submitEntry()">Add Entry</button>
-</div>
-
-</div>
-</div>
-
-<div class="panel">
-<div class="p-title">Day Book Entries</div>
-
-<div class="tblwrap">
-<table>
-<thead>
-<tr>
-<th>#</th>
-<th>Date</th>
-<th>Particulars</th>
-<th>Type</th>
-<th>Mode</th>
-<th class="r">Debit</th>
-<th class="r">Credit</th>
-<th class="r">Cash</th>
-<th class="r">Bank</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody id="db-tb"></tbody>
-</table>
-</div>
+<!-- REPORTS -->
+<div id="sec-reports" class="sec">
+  <div class="panel">
+    <div class="p-title">Month-wise Summary - FY 2026-27</div>
+    <div style="overflow-x:auto">
+      <table class="rtbl">
+        <thead><tr>
+          <th style="text-align:left">Month</th>
+          <th>Collections</th><th>Expenses</th><th>Net</th>
+          <th>Cash Bal</th><th>Bank Bal</th><th>MC Status</th>
+        </tr></thead>
+        <tbody id="rep-tb"></tbody>
+        <tfoot id="rep-tf"></tfoot>
+      </table>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="p-title">Export</div>
+    <div style="display:flex;gap:9px;flex-wrap:wrap">
+      <button class="btn bgo" onclick="exportXL()">Export Day Book (Excel)</button>
+      <button class="btn bn" onclick="exportRep()">Export Summary</button>
+      <button class="btn bo" onclick="window.print()">Print</button>
+    </div>
+    <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Previous Years</div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <a href="https://arwaaccounts2024-2025.vercel.app" class="btn bo bsm" target="_blank">FY 2024-25</a>
+        <a href="https://arwaaccounts2024-2025.vercel.app/index_FY2025-26.html" class="btn bo bsm" target="_blank">FY 2025-26</a>
+        <a href="https://arwaaccounts2024-2025.vercel.app/trial_balance_FY2025-26.html" class="btn bo bsm" target="_blank">TB FY 25-26</a>
+      </div>
+    </div>
+  </div>
 </div>
 
 </main>
-</div>
-
 <div id="toast"></div>
 
 <script>
-const ADMIN_ID='admin';
-const ADMIN_PASS='arwa_accounts_2026-2027';
-const VIEW_PASS='arwa2627';
+/* =====================================================
+   CONSTANTS & GLOBALS
+===================================================== */
+const ADMIN_ID   = 'admin';
+const ADMIN_PASS = 'arwa_accounts_2026-2027';
+const VPASS      = 'arwa2627';
+const OPN_CASH   = 4100.00;
+const OPN_BANK   = 30690.50;
+const MONTHS     = ['April 2026','May 2026','June 2026','July 2026','August 2026',
+                    'September 2026','October 2026','November 2026','December 2026',
+                    'January 2027','February 2027','March 2027'];
+const FLOORS = [
+  {n:'5th Floor', f:['A5','B5','C5','D5','E5','F5','G5']},
+  {n:'4th Floor', f:['A4','B4','C4','D4','E4','F4','G4']},
+  {n:'3rd Floor', f:['A3','B3','C3','D3','E3','F3','G3']},
+  {n:'2nd Floor', f:['A2','B2','C2','D2','E2','F2','G2']},
+  {n:'1st Floor', f:['A1','B1','C1/D1','E1','F1','G1']},
+];
+const ALL34 = ['A1','A2','A3','A4','A5','B1','B2','B3','B4','B5',
+               'C1/D1','C2','C3','C4','C5','D2','D3','D4','D5',
+               'E1','E2','E3','E4','E5','F1','F2','F3','F4','F5',
+               'G1','G2','G3','G4','G5'];
 
-const OPEN_CASH=4100;
-const OPEN_BANK=30690.5;
+const APR_ENT = [
+ 
+  {id:"a01",date:"2026-04-01",desc:"MC April 2026 - D2,G4 (Parking) - Feroz Khan A",type:"MC",debit:0,credit:3000,mode:"Bank",flat:"D2",month:"April 2026"},
+  {id:"a02",date:"2026-04-01",desc:"MC April 2026 - C4 - Mr Srinivasan K",type:"MC",debit:0,credit:1500,mode:"Bank",flat:"C4",month:"April 2026"},
+  {id:"a03",date:"2026-04-01",desc:"MC April 2026 - B4 - Mohamed Thariq Abdul Jabbar",type:"MC",debit:0,credit:1500,mode:"Bank",flat:"B4",month:"April 2026"},
+  {id:"a04",date:"2026-04-01",desc:"MC April 2026 - C3 - Amjath Basha A",type:"MC",debit:0,credit:1500,mode:"Bank",flat:"C3",month:"April 2026"},
+  {id:"a05",date:"2026-04-02",desc:"Housekeeping wages - Farose N",type:"EXP",debit:600.00,credit:0,mode:"Bank",flat:"",month:"April 2026"},
+  {id:"a06",date:"2026-04-02",desc:"MC April 2026 - A3 - Surendhar K",type:"MC",debit:0,credit:1500,mode:"Bank",flat:"A3",month:"April 2026"},
+  {id:"a07",date:"2026-04-02",desc:"MC April 2026 - F2 - Farose N",type:"MC",debit:0,credit:1500,mode:"Bank",flat:"F2",month:"April 2026"},
+  {id:"a08",date:"2026-04-02",desc:"MC April 2026 - D4 - Mrs Sathya V",type:"MC",debit:0,credit:1500,mode:"Bank",flat:"D4",month:"April 2026"},
+  {id:"a09",date:"2026-04-03",desc:"MC April 2026 - B3 - Md.Vassemudeen / Bilaludeen",type:"MC",debit:0,credit:1500,mode:"Bank",flat:"B3",month:"April 2026"},
+  {id:"a10",date:"2026-04-03",desc:"MC April 2026 - E5 - T Mohamed Gani",type:"MC",debit:0,credit:1500,mode:"Bank",flat:"E5",month:"April 2026"},
+  {id:"a11",date:"2026-04-04",desc:"MC April 2026 - E3 - Suganya Mariappan / Prasanna",type:"MC",debit:0,credit:1500,mode:"Bank",flat:"E3",month:"April 2026"},
+  {id:"a12",date:"2026-04-04",desc:"MC April 2026 - F4 - Abdur Rahman",type:"MC",debit:0,credit:1500,mode:"Bank",flat:"F4",month:"April 2026"},
+  {id:"a13",date:"2026-04-05",desc:"MC April 2026 - E4 - Mrs Sahayamary Arunachalam",type:"MC",debit:0,credit:1500,mode:"Bank",flat:"E4",month:"April 2026"},
+  {id:"a14",date:"2026-04-06",desc:"MC April 2026 - F3 - Mrs S Saranya / Vignesh",type:"MC",debit:0,credit:1500,mode:"Bank",flat:"F3",month:"April 2026"},
+  {id:"a15",date:"2026-04-06",desc:"Garbage clearing exp - Mrs S Saranya",type:"EXP",debit:600,credit:0,mode:"Bank",flat:"",month:"April 2026"},
+  {id:"a16",date:"2026-04-06",desc:"MC April 2026 - C1/D1 - Ramesh",type:"MC",debit:0,credit:1500,mode:"Bank",flat:"C1/D1",month:"April 2026"},
+  {id:"a17",date:"2026-04-06",desc:"Security salary - Mr Purushothama Raju",type:"EXP",debit:24000,credit:0,mode:"Bank",flat:"",month:"April 2026"},
+  {id:"a18",date:"2026-04-06",desc:"MC April 2026 - G3 - Suganya S / Karikalan",type:"MC",debit:0,credit:1500,mode:"Bank",flat:"G3",month:"April 2026"},
+  {id:"a19",date:"2026-04-06",desc:"MC April 2026 - F1,B5 (Parking) - Vignesh S",type:"MC",debit:0,credit:3000,mode:"Bank",flat:"F1",month:"April 2026"},
+  {id:"a20",date:"2026-04-08",desc:"MC April 2026 - D5 - Dhanabalan Shanmugam",type:"MC",debit:0,credit:1500,mode:"Bank",flat:"D5",month:"April 2026"},
+  {id:"a21",date:"2026-04-08",desc:"MC April 2026 - B1 - Mithun C",type:"MC",debit:0,credit:1500,mode:"Bank",flat:"B1",month:"April 2026"},
+  {id:"a22",date:"2026-04-08",desc:"MC April 2026 - A4 - K Vignesh",type:"MC",debit:0,credit:1500,mode:"Bank",flat:"A4",month:"April 2026"},
+  {id:"a23",date:"2026-04-09",desc:"Housekeeping wages - Farose N",type:"EXP",debit:600,credit:0,mode:"Bank",flat:"",month:"April 2026"},
+  {id:"a24",date:"2026-04-10",desc:"MC April 2026 - D3 - John Amalraj",type:"MC",debit:0,credit:1500,mode:"Bank",flat:"D3",month:"April 2026"},
+  {id:"a25",date:"2026-04-11",desc:"MC April 2026 - C2 - Devaraju G",type:"MC",debit:0,credit:1500,mode:"Bank",flat:"C2",month:"April 2026"},
+  {id:"a26",date:"2026-04-13",desc:"Septic tank cleaning - Ms Divya Manimaran",type:"EXP",debit:4200,credit:0,mode:"Bank",flat:"",month:"April 2026"},
+  {id:"a27",date:"2026-04-14",desc:"MC April 2026 - A1 - As.Siique / Life Style Optical",type:"MC",debit:0,credit:1500,mode:"Bank",flat:"A1",month:"April 2026"},
+  {id:"a28",date:"2026-04-16",desc:"Housekeeping wages - Farose N",type:"EXP",debit:600,credit:0,mode:"Bank",flat:"",month:"April 2026"},
+  {id:"a29",date:"2026-04-18",desc:"MC April 2026 - G1 - Mr Niyaz Hussain",type:"MC",debit:0,credit:1500,mode:"Bank",flat:"G1",month:"April 2026"},
+  {id:"a30",date:"2026-04-22",desc:"Septic tank cleaning - Ms Divya Manimaran",type:"EXP",debit:4200,credit:0,mode:"Bank",flat:"",month:"April 2026"},
+  {id:"a31",date:"2026-04-24",desc:"Cleaning work exp - Suganya Mariappan",type:"EXP",debit:1400,credit:0,mode:"Bank",flat:"",month:"April 2026"},
+  {id:"a32",date:"2026-04-25",desc:"Bank debit - YESB0MCHUPI / Sumaiya Parveen Shajahan",type:"EXP",debit:550,credit:0,mode:"Bank",flat:"",month:"April 2026"},
+  {id:"a33",date:"2026-04-28",desc:"MC April 2026 - C5, F5 - Karthick / Balaguru / Prasanna",type:"MC",debit:0,credit:3000,mode:"Bank",flat:"C5",month:"April 2026"},
+  {id:"a34",date:"2026-04-29",desc:"WiFi Net renewal (6+2 months) - ATM WDL",type:"EXP",debit:4000,credit:0,mode:"Bank",flat:"",month:"April 2026"},
+  {id:"a35",date:"2026-04-29",desc:"MC April 2026 - G2 - Liyandar Anthuvan",type:"MC",debit:0,credit:1500,mode:"Bank",flat:"G2",month:"April 2026"},
+  {id:"a35",date:"2026-04-30",desc:"MC March 2026 - G5 - Chanru"_March MC pending",type:"MC",debit:0,credit:1500,mode:"Cash",flat:"G5",month:"April 2026"},
+  {id:"a36",date:"2026-04-31",desc:"Housekeeping wages - Farose N",type:"EXP",debit:600,credit:0,mode:"Bank",flat:"",month:"April 2026"}
+];
+const APR_MC = {"April 2026":{
+  "A1":"paid","A2":"defaulter","A3":"paid","A4":"paid","A5":"defaulter",
+  "B1":"paid","B2":"defaulter","B3":"paid","B4":"paid","B5":"paid",
+  "C1/D1":"paid","C2":"paid","C3":"paid","C4":"paid","C5":"paid",
+  "D2":"paid","D3":"paid","D4":"paid","D5":"paid",
+  "E1":"defaulter","E2":"defaulter","E3":"paid","E4":"paid","E5":"paid",
+  "F1":"paid","F2":"paid","F3":"paid","F4":"paid","F5":"paid",
+  "G1":"paid","G2":"paid","G3":"paid","G4":"paid","G5":"defaulter"
+}};
 
-let role='';
-let editId=null;
+let role='', entries=[], mcSt={}, aPhone='', editId=null, waFlat='';
 
-let entries=JSON.parse(localStorage.getItem('arwa_entries')||'[]');
-
-function toast(msg){
- const t=document.getElementById('toast');
- t.innerText=msg;
- t.classList.add('show');
- setTimeout(()=>t.classList.remove('show'),2500);
-}
-
+/* =====================================================
+   GLOBAL FUNCTIONS (called from onclick)
+===================================================== */
 function doLogin(){
- const u=document.getElementById('loginUser').value.trim();
- const p=document.getElementById('loginPass').value.trim();
-
- if(u===ADMIN_ID && p===ADMIN_PASS){
-   role='admin';
- }else if(p===VIEW_PASS){
-   role='viewer';
- }else{
-   alert('Wrong Login');
-   return;
- }
-
- document.getElementById('loginPage').classList.add('hidden');
- document.getElementById('app').classList.remove('hidden');
-
- if(role==='viewer'){
-   document.querySelectorAll('.admin-only').forEach(el=>el.style.display='none');
- }
-
- init();
+  const u=(document.getElementById('loginUser').value||'').trim();
+  const p=document.getElementById('loginPass').value||'';
+  if(u===ADMIN_ID && p===ADMIN_PASS){
+    role='admin';
+    document.getElementById('loginOverlay').style.display='none';
+    if(window.bootApp) window.bootApp();
+    toast('Welcome Treasurer! Full access.','ok');
+  } else if(p===VPASS){
+    role='viewer';
+    document.getElementById('loginOverlay').style.display='none';
+    if(window.bootApp) window.bootApp();
+    toast('Member Viewer access.');
+  } else {
+    const e=document.getElementById('loginErr');
+    e.style.display='block';
+    e.textContent='Wrong credentials. Please try again.';
+    document.getElementById('loginPass').value='';
+  }
 }
-
-function init(){
- document.getElementById('e-date').value=new Date().toISOString().split('T')[0];
- renderDB();
- renderSummary();
+function doLogout(){
+  role='';
+  document.getElementById('loginOverlay').style.display='flex';
+  document.getElementById('loginPass').value='';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginErr').style.display='none';
 }
-
+function showSec(id,btn){
+  if(role==='viewer'&&(id==='entry'||id==='wa')){toast('Admin access only','err');return;}
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  const s=document.getElementById('sec-'+id); if(s) s.classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+function toast(msg,t=''){
+  const el=document.getElementById('toast'); if(!el) return;
+  el.textContent=msg; el.className='show'+(t?' '+t:'');
+  clearTimeout(el._t); el._t=setTimeout(()=>el.className='',3200);
+}
 function submitEntry(){
-
- const obj={
-   id:editId || Date.now(),
-   date:document.getElementById('e-date').value,
-   desc:document.getElementById('e-desc').value,
-   type:document.getElementById('e-type').value,
-   debit:Number(document.getElementById('e-dr').value||0),
-   credit:Number(document.getElementById('e-cr').value||0),
-   mode:document.getElementById('e-mode').value,
-   flat:document.getElementById('e-flat').value,
-   month:document.getElementById('e-month').value
- };
-
- if(!obj.date || !obj.desc){
-   alert('Fill required fields');
-   return;
- }
-
- if(obj.debit<=0 && obj.credit<=0){
-   alert('Enter debit or credit');
-   return;
- }
-
- if(editId){
-   const idx=entries.findIndex(e=>e.id==editId);
-   entries[idx]=obj;
-   toast('Entry Updated');
- }else{
-   entries.push(obj);
-   toast('Entry Added');
- }
-
- entries.sort((a,b)=>a.date.localeCompare(b.date));
-
- localStorage.setItem('arwa_entries',JSON.stringify(entries));
-
- cancelEdit();
- renderDB();
- renderSummary();
- clearForm();
+  const date=gv('e-date'), desc=(gv('e-desc')||'').trim();
+  const type=gv('e-type')||'MC', dr=parseFloat(gv('e-dr'))||0;
+  const cr=parseFloat(gv('e-cr'))||0, mode=gv('e-mode')||'Bank';
+  const flat=gv('e-flat')||'', month=gv('e-month')||'April 2026';
+  if(!date){toast('Select a date','err');return;}
+  if(!desc){toast('Enter particulars','err');return;}
+  if(!dr&&!cr){toast('Enter debit or credit amount','err');return;}
+  if(editId){
+    const i=entries.findIndex(e=>e.id===editId);
+    if(i>-1) entries[i]={...entries[i],date,desc,type,debit:dr,credit:cr,mode,flat,month};
+    saveE(); renderAll(); toast('Entry updated!','ok'); cancelEdit();
+  } else {
+    entries.push({id:'e'+Date.now(),date,desc,type,debit:dr,credit:cr,mode,flat,month});
+    saveE(); renderAll(); clrForm(); toast('Entry added!','ok');
+  }
+  // Auto-green MC if MC credit with flat
+  if(type==='MC'&&flat&&month){
+    if(!mcSt[month]) mcSt[month]={};
+    mcSt[month][flat]='paid'; saveMC(); renderMC();
+  }
 }
-
+function renderMC(){
+  const m=gv('mc-sel')||'April 2026';
+  const lbl=document.getElementById('mc-lbl'); if(lbl) lbl.textContent=m;
+  const mc=mcSt[m]||{};
+  const getSt=f=>mc[f]||'defaulter';
+  const isA=role==='admin';
+  const tb=document.getElementById('mc-tb'); if(!tb) return;
+  tb.innerHTML=FLOORS.map(fl=>{
+    const cells=fl.f.map(f=>{
+      if(f==='—') return '<td><span class="fc fn">-</span></td>';
+      const st=getSt(f);
+      const cls=st==='paid'?'fp':st==='reminder'?'fr':'fd';
+      const cl=isA?`onclick="tgFlat('${f}','${m}')"`:'' ;
+      const cur=isA?'':'cursor:default';
+      return `<td><button class="fc ${cls}" ${cl} style="${cur}" title="${f}: ${st}">${f}</button></td>`;
+    });
+    while(cells.length<7) cells.push('<td><span class="fc fn">-</span></td>');
+    return `<tr><td>${fl.n}</td>${cells.join('')}</tr>`;
+  }).join('');
+  // Summary
+  const paid=ALL34.filter(f=>getSt(f)==='paid').length;
+  const defs=ALL34.filter(f=>getSt(f)==='defaulter'||getSt(f)==='reminder');
+  sv('mc-col','Rs.'+fmtN(paid*1500)); sv('mc-col-f',paid+'/34 flats paid');
+  sv('mc-pen','Rs.'+fmtN((34-paid)*1500)); sv('mc-pen-f',(34-paid)+' flats pending');
+  sv('mc-def',defs.length?defs.join(' | '):(m?'All paid':'Select month'));
+  sv('s-paid',paid); sv('s-def',ALL34.filter(f=>getSt(f)==='defaulter').length);
+  // Update WA defaulters
+  const wd=document.getElementById('wa-defs');
+  if(wd) wd.textContent=defs.length?defs.join(' | '):(m?'All paid for '+m:'Select month in MC Status.');
+}
 function renderDB(){
-
- const tb=document.getElementById('db-tb');
-
- if(entries.length===0){
-   tb.innerHTML=`<tr><td colspan="10" style="text-align:center">No Entries</td></tr>`;
-   return;
- }
-
- let cash=OPEN_CASH;
- let bank=OPEN_BANK;
-
- tb.innerHTML=entries.map((e,i)=>{
-
-   if(e.mode==='Cash'){
-     cash+=e.credit-e.debit;
-   }else{
-     bank+=e.credit-e.debit;
-   }
-
-   return `
-   <tr>
-   <td>${i+1}</td>
-   <td>${e.date}</td>
-   <td>${e.desc}</td>
-   <td>${e.type}</td>
-   <td>${e.mode}</td>
-   <td class="r">${e.debit?e.debit.toLocaleString('en-IN'):'-'}</td>
-   <td class="r">${e.credit?e.credit.toLocaleString('en-IN'):'-'}</td>
-   <td class="r">${cash.toLocaleString('en-IN')}</td>
-   <td class="r">${bank.toLocaleString('en-IN')}</td>
-   <td>
-
-   ${role==='admin'?`
-
-   <button class="ab" onclick="editEntry(${e.id})">✏️</button>
-
-   <button class="ab" onclick="deleteEntry(${e.id})">🗑️</button>
-
-   `:''}
-
-   </td>
-   </tr>`;
-
- }).join('');
+  const fm=gv('f-mon')||'All', ft=gv('f-typ')||'All';
+  const fs=(gv('f-srch')||'').toLowerCase();
+  const sorted=[...entries].sort((a,b)=>a.date.localeCompare(b.date));
+  let rc=OPN_CASH,rb=OPN_BANK;
+  sorted.forEach(e=>{const d=+e.debit||0,c=+e.credit||0;e.mode==='Cash'?rc+=c-d:rb+=c-d;e._c=rc;e._b=rb;});
+  const rows=sorted.filter(e=>{
+    if(fm!=='All'&&e.month!==fm) return false;
+    if(ft!=='All'&&e.type!==ft) return false;
+    if(fs&&!e.desc.toLowerCase().includes(fs)) return false;
+    return true;
+  });
+  const tb=document.getElementById('db-tb'); if(!tb) return;
+  let html='';
+  if(fm!=='All'){
+    const pb=getPrevBal(fm);
+    const mi=MONTHS.indexOf(fm);
+    html+=`<tr class="ropn" style="background:#e8eef8"><td>-</td><td>${fm} Opening</td><td colspan="3"><em>Opening b/f - ${mi===0?'Mar 2026 (FY25-26 closing)':MONTHS[mi-1]+' closing'}</em></td><td class="r">-</td><td class="r">-</td><td class="r tbl">Rs.${fmtN(pb.cash)}</td><td class="r tbl">Rs.${fmtN(pb.bank)}</td><td></td></tr>`;
+  }
+  if(!rows.length&&!html){tb.innerHTML=`<tr><td colspan="10"><div class="emp"><div class="emp-i">📭</div><p>No entries. Add your first entry above.</p></div></td></tr>`;return;}
+  html+=rows.map((e,i)=>{
+    const tc=e.type==='MC'?'tmc':e.type==='EXP'?'tex':'tot';
+    const isA=role==='admin';
+    return `<tr class="${i%2?'alt':''}">
+      <td style="color:var(--muted);font-size:11px">${i+1}</td>
+      <td style="font-family:var(--ff-m);font-size:12px;white-space:nowrap">${e.date}</td>
+      <td>${e.desc}${e.flat?`<br><span style="font-size:11px;color:var(--muted)">Flat ${e.flat} | ${e.month}</span>`:''}</td>
+      <td><span class="${tc}">${e.type}</span></td>
+      <td><span class="${e.mode==='Cash'?'mca':'mcb'}">${e.mode}</span></td>
+      <td class="r tdr">${e.debit>0?fmtN(e.debit):'-'}</td>
+      <td class="r tcr">${e.credit>0?fmtN(e.credit):'-'}</td>
+      <td class="r tbl">Rs.${fmtN(e._c)}</td>
+      <td class="r tbl">Rs.${fmtN(e._b)}</td>
+      <td style="white-space:nowrap">${isA?`<button class="ab" onclick="editEnt('${e.id}')" title="Edit">✏️</button><button class="ab" onclick="delEnt('${e.id}')" title="Delete">🗑</button>`:''}</td>
+    </tr>`;
+  }).join('');
+  if(fm!=='All'&&rows.length){
+    const last=rows[rows.length-1];
+    html+=`<tr class="rcls"><td>-</td><td>${fm} Closing</td><td colspan="3"><strong>Closing Balance - ${fm}</strong></td><td class="r">-</td><td class="r">-</td><td class="r">Rs.${fmtN(last._c)}</td><td class="r">Rs.${fmtN(last._b)}</td><td></td></tr>`;
+  }
+  tb.innerHTML=html;
+  const b=calcBal();
+  sv('ft-c','Rs.'+fmtN(b.cash)); sv('ft-b','Rs.'+fmtN(b.bank)); sv('ft-n',entries.length);
+}
+function tgFlat(f,m){
+  if(!m){toast('Select month first','err');return;}
+  if(!mcSt[m]) mcSt[m]={};
+  const cur=mcSt[m][f]||'defaulter';
+  const nxt=cur==='defaulter'?'reminder':cur==='reminder'?'paid':'defaulter';
+  mcSt[m][f]=nxt; saveMC(); renderMC();
+  toast((nxt==='paid'?'Green - Paid':nxt==='reminder'?'Yellow - Reminder':'Red - Defaulter')+' : Flat '+f,'ok');
+}
+function markAll(st){
+  const m=gv('mc-sel'); if(!m){toast('Select month first','err');return;}
+  if(!mcSt[m]) mcSt[m]={};
+  ALL34.forEach(f=>mcSt[m][f]=st); saveMC(); renderMC(); toast('All flats -> '+st,'ok');
+}
+function resetMC(){
+  const m=gv('mc-sel'); if(!m){toast('Select month','err');return;}
+  if(confirm('Reset all MC for '+m+'?')){delete mcSt[m];saveMC();renderMC();toast('MC reset');}
+}
+function editEnt(id){
+  const e=entries.find(x=>x.id===id); if(!e) return;
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  const se=document.getElementById('sec-entry'),be=document.getElementById('nb-entry');
+  if(se) se.classList.add('active'); if(be) be.classList.add('active');
+  setv('e-date',e.date); setv('e-desc',e.desc); setv('e-type',e.type);
+  setv('e-dr',e.debit||''); setv('e-cr',e.credit||'');
+  setv('e-mode',e.mode); setv('e-flat',e.flat||''); setv('e-month',e.month);
+  editId=e.id; setEditMode(true);
+  const d=document.getElementById('e-date'); if(d) d.scrollIntoView({behavior:'smooth',block:'center'});
+  toast('Edit mode - update then click Update Entry');
+}
+function cancelEdit(){editId=null;setEditMode(false);clrForm();toast('Cancelled');}
+function delEnt(id){
+  if(confirm('Delete this entry?')){
+    entries=entries.filter(e=>e.id!==id); saveE(); renderAll(); toast('Deleted');
+  }
+}
+function clearAll(){
+  if(confirm('Clear ALL entries? This cannot be undone!')){
+    entries=[]; saveE(); renderAll(); toast('Cleared');
+  }
+}
+function qMC(n){
+  const m=gv('e-month')||'April 2026';
+  setv('e-desc','MC '+m+' - '+n+' Flats x Rs.1,500');
+  setv('e-type','MC'); setv('e-cr',n*1500); setv('e-dr','');
+  toast('Quick fill: MC '+n+' flats = Rs.'+fmtN(n*1500));
+}
+function qExp(d,a){
+  setv('e-desc',d); setv('e-type','EXP'); setv('e-dr',a||''); setv('e-cr','');
+  if(a) toast('Quick fill: '+d+' = Rs.'+fmtN(a));
+}
+function previewWA(){
+  const msg=getWAmsg(), el=document.getElementById('wa-prev'); if(!el) return;
+  if(!msg){el.style.display='none';toast('Select action first','err');return;}
+  el.textContent=msg; el.style.display='block';
+}
+function sendWA(){
+  const msg=getWAmsg(); if(!msg){toast('Select action','err');return;}
+  const ph=(gv('wa-ph')||'').replace(/\D/g,'');
+  window.open('https://wa.me/'+(ph||'')+'?text='+encodeURIComponent(msg),'_blank');
+}
+function savePhone(){
+  aPhone=gv('wa-ph');
+  localStorage.setItem('arwa_phone',aPhone);
+  const sp=document.getElementById('ph-saved');
+  if(sp){sp.textContent='Saved';setTimeout(()=>sp.textContent='',2000);}
+}
+function exportXL(){
+  if(!entries.length){toast('No entries','err');return;}
+  const s=[...entries].sort((a,b)=>a.date.localeCompare(b.date));
+  let rc=OPN_CASH,rb=OPN_BANK;
+  const rows=s.map((e,i)=>{
+    const d=+e.debit||0,c=+e.credit||0;
+    e.mode==='Cash'?rc+=c-d:rb+=c-d;
+    return{'#':i+1,Date:e.date,Particulars:e.desc,Type:e.type,Mode:e.mode,Flat:e.flat,Month:e.month,
+           'Debit':d||'','Credit':c||'','Cash Bal':Math.round(rc),'Bank Bal':Math.round(rb),'Total':Math.round(rc+rb)};
+  });
+  const ws=XLSX.utils.json_to_sheet(rows),wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'DayBook FY2026-27');
+  XLSX.writeFile(wb,'ARWA_DayBook_FY2026-27.xlsx');
+  toast('Excel exported!','ok');
+}
+function exportRep(){
+  const rows=MONTHS.map(m=>{
+    const me=entries.filter(e=>e.month===m);
+    const col=me.reduce((s,e)=>s+(+e.credit||0),0);
+    const exp=me.reduce((s,e)=>s+(+e.debit||0),0);
+    const mc=mcSt[m]||{};
+    const paid=ALL34.filter(f=>(mc[f]||'defaulter')==='paid').length;
+    return{Month:m,Collections:col||'',Expenses:exp||'',Net:col-exp||'','MC Paid':paid+'/34'};
+  }).filter(r=>r.Collections||r.Expenses);
+  if(!rows.length){toast('No data','err');return;}
+  const ws=XLSX.utils.json_to_sheet(rows),wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Summary');
+  XLSX.writeFile(wb,'ARWA_Report_FY2026-27.xlsx');
+  toast('Report exported!','ok');
 }
 
-function editEntry(id){
+/* =====================================================
+   DOM READY
+===================================================== */
+document.addEventListener('DOMContentLoaded',function(){
+  ['loginUser','loginPass'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+  });
 
- const e=entries.find(x=>x.id==id);
-
- if(!e) return;
-
- editId=id;
-
- document.getElementById('e-date').value=e.date;
- document.getElementById('e-desc').value=e.desc;
- document.getElementById('e-type').value=e.type;
- document.getElementById('e-dr').value=e.debit;
- document.getElementById('e-cr').value=e.credit;
- document.getElementById('e-mode').value=e.mode;
- document.getElementById('e-flat').value=e.flat;
- document.getElementById('e-month').value=e.month;
-
- document.getElementById('saveBtn').innerText='Update Entry';
- document.getElementById('saveBtn').className='btn ba';
- document.getElementById('editBan').style.display='block';
- document.getElementById('formTitle').innerText='Edit Entry';
-
- window.scrollTo({top:0,behavior:'smooth'});
+window.bootApp = function boot(){
+  const se=localStorage.getItem('arwa_e2627');
+  entries=se?JSON.parse(se):JSON.parse(JSON.stringify(APR_ENT));
+  if(!se) saveE();
+  const sm=localStorage.getItem('arwa_m2627');
+  mcSt=sm?JSON.parse(sm):JSON.parse(JSON.stringify(APR_MC));
+  if(!sm) saveMC();
+  if(!mcSt['April 2026']){mcSt['April 2026']=APR_MC['April 2026'];saveMC();}
+  aPhone=localStorage.getItem('arwa_phone')||'';
+  const isA=role==='admin';
+  document.querySelectorAll('.admin-only').forEach(el=>el.style.display=isA?'':'none');
+  const rb=document.getElementById('roleBadge');
+  if(rb){rb.textContent=isA?'Admin':'Viewer';rb.style.color=isA?'var(--gold2)':'rgba(255,255,255,.4)';}
+  const vb=document.getElementById('vbanner'); if(vb) vb.style.display=isA?'none':'block';
+  const tip=document.getElementById('mc-tip');
+  if(tip) tip.textContent=isA?'Click flat to toggle: Red > Yellow > Green':'Read-only view';
+  setToday();
+  renderAll();
+  buildWAFlats();
+  const wp=document.getElementById('wa-ph'); if(wp&&aPhone) wp.value=aPhone;
+  setv('mc-sel','April 2026'); renderMC();
+  if(!isA){
+    document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+    document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+    const ms=document.getElementById('sec-mc'),mb=document.getElementById('nb-mc');
+    if(ms) ms.classList.add('active'); if(mb) mb.classList.add('active');
+  }
 }
 
-function cancelEdit(){
- editId=null;
- document.getElementById('saveBtn').innerText='Add Entry';
- document.getElementById('saveBtn').className='btn bn';
- document.getElementById('editBan').style.display='none';
- document.getElementById('formTitle').innerText='Add Entry';
+function renderAll(){renderDash();renderDB();renderMC();renderRep();}
+
+function renderDash(){
+  const b=calcBal();
+  sv('s-cash','Rs.'+fmtN(b.cash)); sv('s-bank','Rs.'+fmtN(b.bank));
+  sv('s-total','Rs.'+fmtN(b.total)); sv('s-exp','Rs.'+fmtN(b.exp));
+  const mc=mcSt['April 2026']||{};
+  const paid=ALL34.filter(f=>(mc[f]||'defaulter')==='paid').length;
+  sv('s-paid',paid); sv('s-def',ALL34.filter(f=>(mc[f]||'defaulter')==='defaulter').length);
+  const bmap=runBals();
+  const recent=[...entries].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,10);
+  const tb=document.getElementById('rec-tb'); if(!tb) return;
+  if(!recent.length){tb.innerHTML='<tr><td colspan="8"><div class="emp"><div class="emp-i">📭</div><p>No entries yet.</p></div></td></tr>';return;}
+  tb.innerHTML=recent.map((e,i)=>{
+    const bl=bmap[e.id]||{cash:OPN_CASH,bank:OPN_BANK};
+    const tc=e.type==='MC'?'tmc':e.type==='EXP'?'tex':'tot';
+    return `<tr class="${i%2?'alt':''}">
+      <td>${e.date}</td><td>${e.desc}</td>
+      <td><span class="${tc}">${e.type}</span></td>
+      <td><span class="${e.mode==='Cash'?'mca':'mcb'}">${e.mode}</span></td>
+      <td class="r tdr">${e.debit>0?fmtN(e.debit):'-'}</td>
+      <td class="r tcr">${e.credit>0?fmtN(e.credit):'-'}</td>
+      <td class="r tbl">Rs.${fmtN(bl.cash)}</td>
+      <td class="r tbl">Rs.${fmtN(bl.bank)}</td>
+    </tr>`;
+  }).join('');
 }
 
-function deleteEntry(id){
-
- if(!confirm('Delete Entry?')) return;
-
- entries=entries.filter(e=>e.id!=id);
-
- localStorage.setItem('arwa_entries',JSON.stringify(entries));
-
- renderDB();
- renderSummary();
-
- toast('Entry Deleted');
+function renderRep(){
+  const tb=document.getElementById('rep-tb'),tf=document.getElementById('rep-tf');
+  if(!tb) return;
+  const sorted=[...entries].sort((a,b)=>a.date.localeCompare(b.date));
+  let rc=OPN_CASH,rb=OPN_BANK; const md={};
+  MONTHS.forEach(m=>md[m]={col:0,exp:0,ec:OPN_CASH,eb:OPN_BANK});
+  sorted.forEach(e=>{
+    const d=+e.debit||0,c=+e.credit||0;
+    e.mode==='Cash'?rc+=c-d:rb+=c-d;
+    if(md[e.month]){md[e.month].col+=c;md[e.month].exp+=d;md[e.month].ec=rc;md[e.month].eb=rb;}
+  });
+  let tcol=0,texp=0;
+  const rows=MONTHS.map((m,i)=>{
+    const d=md[m]; if(!d.col&&!d.exp) return '';
+    tcol+=d.col; texp+=d.exp;
+    const mc=mcSt[m]||{};
+    const paid=ALL34.filter(f=>(mc[f]||'defaulter')==='paid').length;
+    return `<tr class="${i%2?'alt':''}">
+      <td>${m}</td>
+      <td style="color:var(--green)">${d.col>0?fmtN(d.col):'-'}</td>
+      <td style="color:var(--red)">${d.exp>0?fmtN(d.exp):'-'}</td>
+      <td style="color:var(--navy);font-weight:600">${fmtN(d.col-d.exp)}</td>
+      <td>Rs.${fmtN(d.ec)}</td>
+      <td>Rs.${fmtN(d.eb)}</td>
+      <td style="text-align:center"><span class="${paid===34?'tmc':paid>0?'tot':'tex'}">${paid}/34</span></td>
+    </tr>`;
+  }).filter(Boolean).join('');
+  tb.innerHTML=rows||'<tr><td colspan="7"><div class="emp"><p>Add entries to see reports.</p></div></td></tr>';
+  if(tf) tf.innerHTML=`<tr><td>Year Total</td><td style="color:#86efac">${fmtN(tcol)}</td><td style="color:#fca5a5">${fmtN(texp)}</td><td style="color:var(--gold2)">${fmtN(tcol-texp)}</td><td>Rs.${fmtN(rc)}</td><td>Rs.${fmtN(rb)}</td><td></td></tr>`;
 }
 
-function renderSummary(){
-
- let cash=OPEN_CASH;
- let bank=OPEN_BANK;
- let exp=0;
-
- entries.forEach(e=>{
-
-   if(e.mode==='Cash'){
-     cash+=e.credit-e.debit;
-   }else{
-     bank+=e.credit-e.debit;
-   }
-
-   exp+=e.debit;
- });
-
- document.getElementById('s-cash').innerText='Rs.'+cash.toLocaleString('en-IN');
- document.getElementById('s-bank').innerText='Rs.'+bank.toLocaleString('en-IN');
- document.getElementById('s-total').innerText='Rs.'+(cash+bank).toLocaleString('en-IN');
- document.getElementById('s-exp').innerText='Rs.'+exp.toLocaleString('en-IN');
+function buildWAFlats(){
+  const el=document.getElementById('wa-flats'); if(!el) return;
+  el.innerHTML=ALL34.map(f=>`<button class="fwab" onclick="selWAF('${f}',this)">${f}</button>`).join('');
+}
+window.selWAF=function(f,btn){
+  waFlat=f;
+  document.querySelectorAll('.fwab').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+};
+function getWAmsg(){
+  const act=gv('wa-act'),mon=gv('wa-mon'),fl=waFlat||'your flat';
+  const m={
+    reminder:`Apple Residency WA\nK.K.Nagar, Tiruchirapalli-620021\n\nDear Flat Owner (${fl}),\n\nGentle reminder: MC of Rs.1,500 for ${mon} is due.\nPay via GPay/UPI or cash to Treasurer.\n\nThank you\nARWA Committee`,
+    thanks:`Apple Residency WA\n\nDear Resident (${fl}),\nThank you for paying MC for ${mon}!\nARWA Committee`,
+    final:`Apple Residency WA\n\nFINAL NOTICE\nFlat ${fl} - MC for ${mon} is pending. Please pay immediately.\nARWA Committee`,
+    meeting:`Apple Residency WA\n\nCommittee Meeting Notice\nAll flat owners - Meeting scheduled. Check notice board.\nARWA Committee`,
+  };
+  return m[act]||'';
 }
 
-function clearForm(){
- document.getElementById('e-desc').value='';
- document.getElementById('e-dr').value='';
- document.getElementById('e-cr').value='';
- document.getElementById('e-flat').value='';
+function calcBal(){
+  let cash=OPN_CASH,bank=OPN_BANK,exp=0,cr=0;
+  [...entries].sort((a,b)=>a.date.localeCompare(b.date)).forEach(e=>{
+    const d=+e.debit||0,c=+e.credit||0;
+    e.mode==='Cash'?cash+=c-d:bank+=c-d; if(d) exp+=d; if(c) cr+=c;
+  });
+  return{cash,bank,total:cash+bank,exp,cr};
 }
+function runBals(){
+  let cash=OPN_CASH,bank=OPN_BANK; const map={};
+  [...entries].sort((a,b)=>a.date.localeCompare(b.date)).forEach(e=>{
+    const d=+e.debit||0,c=+e.credit||0;
+    e.mode==='Cash'?cash+=c-d:bank+=c-d; map[e.id]={cash,bank};
+  });
+  return map;
+}
+function getPrevBal(m){
+  const mi=MONTHS.indexOf(m); if(mi<=0) return{cash:OPN_CASH,bank:OPN_BANK};
+  let cash=OPN_CASH,bank=OPN_BANK;
+  [...entries].filter(e=>MONTHS.indexOf(e.month)<mi)
+    .sort((a,b)=>a.date.localeCompare(b.date))
+    .forEach(e=>{const d=+e.debit||0,c=+e.credit||0;e.mode==='Cash'?cash+=c-d:bank+=c-d;});
+  return{cash,bank};
+}
+function setEditMode(on){
+  const btn=document.getElementById('ent-btn'),ban=document.getElementById('edit-ban'),ttl=document.getElementById('ep-title');
+  if(btn){btn.textContent=on?'Update Entry':'Add Entry';btn.className='btn '+(on?'ba':'bn');}
+  if(ban) ban.style.display=on?'flex':'none';
+  if(ttl) ttl.textContent=on?'Edit Day Book Entry':'Add Day Book Entry';
+}
+function clrForm(){['e-dr','e-cr','e-desc','e-flat'].forEach(id=>setv(id,''));setToday();}
+function setToday(){const el=document.getElementById('e-date');if(el) el.value=new Date().toISOString().split('T')[0];}
+function saveE(){localStorage.setItem('arwa_e2627',JSON.stringify(entries));}
+function saveMC(){localStorage.setItem('arwa_m2627',JSON.stringify(mcSt));}
+function gv(id){const el=document.getElementById(id);return el?el.value:'';}
+function setv(id,v){const el=document.getElementById(id);if(el)el.value=v;}
+function sv(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
+function fmtN(n){return Math.round(Math.abs(n)).toLocaleString('en-IN');}
+
+// Expose for onclick
+
+
+// Expose all onclick functions globally
+window.submitEntry = submitEntry;
+window.renderMC    = renderMC;
+window.renderDB    = renderDB;
+window.renderAll   = renderAll;
+window.tgFlat      = tgFlat;
+window.markAll     = markAll;
+window.resetMC     = resetMC;
+window.editEnt     = editEnt;
+window.delEnt      = delEnt;
+window.clearAll    = clearAll;
+window.qMC         = qMC;
+window.qExp        = qExp;
+window.previewWA   = previewWA;
+window.sendWA      = sendWA;
+window.savePhone   = savePhone;
+window.exportXL    = exportXL;
+window.exportRep   = exportRep;
+window.cancelEdit  = cancelEdit;
+window.selWAF      = selWAF;
+
+}); // DOMContentLoaded
 </script>
 
+<footer style="background:#060f1f;color:rgba(255,255,255,.3);text-align:center;font-size:12px;padding:14px">
+  2026-27 Apple Residency Flat Owners Welfare Association | Azath Nagar 2nd Street, K.Sathanur, K.K.Nagar, Tiruchirapalli-620021 | v1.01
+</footer>
 </body>
 </html>
-```
