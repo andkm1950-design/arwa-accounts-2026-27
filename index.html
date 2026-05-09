@@ -618,29 +618,84 @@ function toast(msg,t=''){
   const el=document.getElementById('toast'); if(!el) return;
   el.textContent=msg; el.className='show'+(t?' '+t:'');
   clearTimeout(el._t); el._t=setTimeout(()=>el.className='',3200);
-}
-function submitEntry(){
-  const date=gv('e-date'), desc=(gv('e-desc')||'').trim();
-  const type=gv('e-type')||'MC', dr=parseFloat(gv('e-dr'))||0;
-  const cr=parseFloat(gv('e-cr'))||0, mode=gv('e-mode')||'Bank';
-  const flat=gv('e-flat')||'', month=gv('e-month')||'April 2026';
-  if(!date){toast('Select a date','err');return;}
-  if(!desc){toast('Enter particulars','err');return;}
-  if(!dr&&!cr){toast('Enter debit or credit amount','err');return;}
+}function submitEntry(){
+
+  const date  = gv('e-date');
+  const desc  = (gv('e-desc') || '').trim();
+  const type  = gv('e-type') || 'MC';
+  const dr    = parseFloat(gv('e-dr')) || 0;
+  const cr    = parseFloat(gv('e-cr')) || 0;
+  const mode  = gv('e-mode') || 'Bank';
+  const flat  = gv('e-flat') || '';
+  const month = gv('e-month') || 'April 2026';
+
+  if(!date){
+    toast('Select a date','err');
+    return;
+  }
+
+  if(!desc){
+    toast('Enter particulars','err');
+    return;
+  }
+
+  if(dr <= 0 && cr <= 0){
+    toast('Enter debit or credit amount','err');
+    return;
+  }
+
+  const newEntry = {
+    id      : editId || ('e' + Date.now()),
+    date    : date,
+    desc    : desc,
+    type    : type,
+    debit   : dr,
+    credit  : cr,
+    mode    : mode,
+    flat    : flat,
+    month   : month
+  };
+
   if(editId){
-    const i=entries.findIndex(e=>e.id===editId);
-    if(i>-1) entries[i]={...entries[i],date,desc,type,debit:dr,credit:cr,mode,flat,month};
-    saveE(); renderAll(); toast('Entry updated!','ok'); cancelEdit();
+
+    const idx = entries.findIndex(e => e.id === editId);
+
+    if(idx !== -1){
+      entries[idx] = newEntry;
+    }
+
+    toast('Entry updated!','ok');
+
   } else {
-    entries.push({id:'e'+Date.now(),date,desc,type,debit:dr,credit:cr,mode,flat,month});
-    saveE(); renderAll(); clrForm(); toast('Entry added!','ok');
+
+    entries.push(newEntry);
+
+    toast('Entry added!','ok');
   }
-  // Auto-green MC if MC credit with flat
-  if(type==='MC'&&flat&&month){
-    if(!mcSt[month]) mcSt[month]={};
-    mcSt[month][flat]='paid'; saveMC(); renderMC();
+
+  // Auto MC Paid
+  if(type === 'MC' && flat){
+
+    if(!mcSt[month]){
+      mcSt[month] = {};
+    }
+
+    mcSt[month][flat] = 'paid';
+
+    saveMC();
   }
+
+  saveE();
+
+  renderAll();
+
+  clrForm();
+
+  cancelEdit();
+  entries.sort((a,b)=>a.date.localeCompare(b.date));
+
 }
+  
 function renderMC(){
   const m=gv('mc-sel')||'April 2026';
   const lbl=document.getElementById('mc-lbl'); if(lbl) lbl.textContent=m;
