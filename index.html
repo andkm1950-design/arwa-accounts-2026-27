@@ -584,6 +584,7 @@ let role='', entries=[], mcSt={}, aPhone='', editId=null, waFlat='';
    GLOBAL FUNCTIONS (called from onclick)
 ===================================================== */
 function doLogin(){
+  document.getElementById('loginErr').style.display='none';
   const u=(document.getElementById('loginUser').value||'').trim();
   const p=document.getElementById('loginPass').value||'';
   if(u===ADMIN_ID && p===ADMIN_PASS){
