@@ -1,0 +1,21 @@
+{
+  "april_2026": [
+    {"id":"a01","date":"2026-04-01","desc":"MC April 2026 - D2,G4 (Parking) - Feroz Khan A","type":"MC","debit":0,"credit":3000,"mode":"Bank","flat":"D2","month":"April 2026"},
+    {"id":"a02","date":"2026-04-01","desc":"MC April 2026 - C4 - Mr Srinivasan K","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"C4","month":"April 2026"},
+    {"id":"a03","date":"2026-04-01","desc":"MC April 2026 - B4 - Mohamed Thariq Abdul Jabbar","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"B4","month":"April 2026"},
+    {"id":"a04","date":"2026-04-01","desc":"MC April 2026 - C3 - Amjath Basha A","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"C3","month":"April 2026"},
+    {"id":"a05","date":"2026-04-02","desc":"Housekeeping wages - Farose N","type":"EXP","debit":600.00,"credit":0,"mode":"Bank","flat":"","month":"April 2026"},
+    {"id":"a06","date":"2026-04-02","desc":"MC April 2026 - A3 - Surendhar K","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"A3","month":"April 2026"}
+  ],
+  "may_2026": [],
+  "june_2026": [],
+  "july_2026": [],
+  "august_2026": [],
+  "september_2026": [],
+  "october_2026": [],
+  "november_2026": [],
+  "december_2026": [],
+  "january_2027": [],
+  "february_2027": [],
+  "march_2027": []
+}
