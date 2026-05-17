@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daybook - FY 2026-27 Entries</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.95;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .summary-card {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .summary-card label {
+            display: block;
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .summary-card .value {
+            font-size: 22px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .table-wrapper {
+            overflow-y: auto;
+            height: 600px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th:last-child {
+            border-right: none;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f0f3ff;
+        }
+
+        tbody tr:nth-child(even):hover {
+            background-color: #e8ecff;
+        }
+
+        td {
+            padding: 14px 12px;
+            font-size: 13px;
+            color: #333;
+        }
+
+        td.date {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        td.id {
+            color: #999;
+            font-weight: 500;
+        }
+
+        td.type {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        td.type.MC {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        td.type.EXP {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        td.debit {
+            color: #dc3545;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        td.credit {
+            color: #28a745;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        td.mode {
+            color: #6c757d;
+            font-size: 12px;
+        }
+
+        td.flat {
+            font-weight: 500;
+            color: #667eea;
+        }
+
+        .scrollbar-hint {
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            color: #999;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+
+        /* Custom scrollbar styling */
+        .table-wrapper::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 4px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .table-wrapper {
+                height: 400px;
+            }
+
+            td, th {
+                padding: 10px 8px;
+                font-size: 12px;
+            }
+
+            .summary {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Daybook - FY 2026-27</h1>
+            <p>All entries from April 1, 2026 to May 17, 2026</p>
+        </div>
+
+        <div class="summary">
+            <div class="summary-card">
+                <label>Total Entries</label>
+                <div class="value" id="totalEntries">0</div>
+            </div>
+            <div class="summary-card">
+                <label>Total Credits</label>
+                <div class="value" id="totalCredits">₹ 0</div>
+            </div>
+            <div class="summary-card">
+                <label>Total Debits</label>
+                <div class="value" id="totalDebits">₹ 0</div>
+            </div>
+            <div class="summary-card">
+                <label>Net Balance</label>
+                <div class="value" id="netBalance">₹ 0</div>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Type</th>
+                        <th>Flat</th>
+                        <th>Debit (₹)</th>
+                        <th>Credit (₹)</th>
+                        <th>Mode</th>
+                        <th>Month</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Data will be populated here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="scrollbar-hint">
+            ↕ Scroll to view all entries • All entries from 1st April onwards
+        </div>
+    </div>
+
+    <script>
+        // Sample data from JSON
+        const data = {
+            "april_2026": [
+                {"id":"a01","date":"2026-04-01","desc":"MC April 2026 - D2,G4 (Parking) - Feroz Khan A","type":"MC","debit":0,"credit":3000,"mode":"Bank","flat":"D2","month":"April 2026"},
+                {"id":"a02","date":"2026-04-01","desc":"MC April 2026 - C4 - Mr Srinivasan K","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"C4","month":"April 2026"},
+                {"id":"a03","date":"2026-04-01","desc":"MC April 2026 - B4 - Mohamed Thariq Abdul Jabbar","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"B4","month":"April 2026"},
+                {"id":"a04","date":"2026-04-01","desc":"MC April 2026 - C3 - Amjath Basha A","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"C3","month":"April 2026"},
+                {"id":"a05","date":"2026-04-02","desc":"Housekeeping wages - Farose N","type":"EXP","debit":600.00,"credit":0,"mode":"Bank","flat":"","month":"April 2026"},
+                {"id":"a06","date":"2026-04-02","desc":"MC April 2026 - A3 - Surendhar K","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"A3","month":"April 2026"}
+            ],
+            "may_2026": [
+                {"id":"b01","date":"2026-05-01","desc":"MC May 2026 – E5 – Mohammed Gani","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"E5","month":"May 2026"},
+                {"id":"b02","date":"2026-05-01","desc":"MC May 2026 - C4 - Mr Srinivasan K","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"C4","month":"May 2026"},
+                {"id":"b03","date":"2026-05-01","desc":"MC May 2026 – A5 - Mr Prasanna","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"A5","month":"May 2026"},
+                {"id":"b04","date":"2026-05-01","desc":"MC May 2026 – A3 - Mr Surenhar K","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"A3","month":"May 2026"},
+                {"id":"b05","date":"2026-05-01","desc":"MC May 2026 – B3 - Mr Vasee/ Bilal","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"B3","month":"May 2026"},
+                {"id":"b06","date":"2026-05-01","desc":"MC May 2026 – F2 - Mr Ferose N","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"F2","month":"May 2026"},
+                {"id":"b07","date":"2026-05-01","desc":"MC May 2026 - B4 - Mr Md.Thariq","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"B4","month":"May 2026"},
+                {"id":"b08","date":"2026-05-01","desc":"MC May 2026 - D2,G4 (Parking) - Feroz Khan A","type":"MC","debit":0,"credit":3000,"mode":"Bank","flat":"D2","month":"May 2026"},
+                {"id":"b09","date":"2026-05-01","desc":"MC May 2026 - D4 - Mrs Sathya V","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"D4","month":"May 2026"},
+                {"id":"b10","date":"2026-05-01","desc":"MC May 2026 - F4 – Mr Abdur Rahman","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"F4","month":"May 2026"},
+                {"id":"b11","date":"2026-05-01","desc":"Gen_Set Diesel - Srinivasan","type":"EXP","debit":2000,"credit":0,"mode":"Bank","flat":"","month":"May 2026"},
+                {"id":"b12","date":"2026-05-02","desc":"MC May 2026 - F3 - Mrs S Saranya / Vignesh","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"F3","month":"May 2026"},
+                {"id":"b13","date":"2026-05-02","desc":"MC May 2026 – E1 - Mr T Kumar","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"E1","month":"May 2026"},
+                {"id":"b14","date":"2026-05-03","desc":"MC May 2026 – E4 - Mrs Mary/Sathya","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"E4","month":"May 2026"},
+                {"id":"b15","date":"2026-05-05","desc":"MC May 2026 - F1,B5 (Parking) - Vignesh S","type":"MC","debit":0,"credit":3000,"mode":"Bank","flat":"F1","month":"May 2026"},
+                {"id":"b16","date":"2026-05-05","desc":"Security salary - Mr Purushothama Raju","type":"EXP","debit":24000,"credit":0,"mode":"Bank","flat":"","month":"May 2026"},
+                {"id":"b17","date":"2026-05-05","desc":"MC May 2026 - C3 - Basha A","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"C3","month":"May 2026"},
+                {"id":"b18","date":"2026-05-05","desc":"MC May 2026 - C1/D1 - Ramesh","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"C1/D1","month":"May 2026"},
+                {"id":"b19","date":"2026-05-06","desc":"MC May 2026 - C2 – Zareena Waheed","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"C2","month":"May 2026"},
+                {"id":"b20","date":"2026-05-07","desc":"MC May 2026 - G3 - Suganya S / Karikalan","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"G3","month":"May 2026"},
+                {"id":"b21","date":"2026-05-09","desc":"MC May 2026 – D5 - Dhanabalan","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"D5","month":"May 2026"},
+                {"id":"b22","date":"2026-05-09","desc":"Housekeeping wages - Farose N","type":"EXP","debit":600.00,"credit":0,"mode":"Bank","flat":"","month":"May 2026"},
+                {"id":"b23","date":"2026-05-09","desc":"MC May 2026 – E2 – Mrs Guhapriya","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"E2","month":"May 2026"},
+                {"id":"b24","date":"2026-05-09","desc":"MC May 2026 – E3 – Mr John Amalraj","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"E3","month":"May 2026"},
+                {"id":"b25","date":"2026-05-11","desc":"MC May 2026 – A2 – Mr Masthan/Priya","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"A2","month":"May 2026"},
+                {"id":"b26","date":"2026-05-12","desc":"MC May 2026 – G2 – Liyandar Anthuvan","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"G2","month":"May 2026"},
+                {"id":"b27","date":"2026-05-12","desc":"MC May 2026 – B1 – Ms Sabitha/Mithun C","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"B1","month":"May 2026"},
+                {"id":"b28","date":"2026-05-12","desc":"MC May 2026 – G5 – Chandru/Gani +April due","type":"MC","debit":0,"credit":3000,"mode":"Bank","flat":"G5","month":"May 2026"},
+                {"id":"b29","date":"2026-05-12","desc":"Septic tank cleaning - Ms Divya Manimaran","type":"EXP","debit":4200,"credit":0,"mode":"Bank","flat":"","month":"May 2026"},
+                {"id":"b30","date":"2026-05-12","desc":"Garbage clearing exp - Mrs S Saranya","type":"EXP","debit":600,"credit":0,"mode":"Bank","flat":"","month":"May 2026"},
+                {"id":"b31","date":"2026-05-16","desc":"MC May 2026 – G1 – Mr NIYAZ","type":"MC","debit":0,"credit":1500,"mode":"Bank","flat":"G1","month":"May 2026"}
+            ]
+        };
+
+        // Combine all entries and sort by date
+        function getAllEntries() {
+            let allEntries = [];
+            
+            // Get today's date (2026-05-17)
+            const todayDate = new Date('2026-05-17');
+            
+            // Combine entries from all months
+            Object.values(data).forEach(monthEntries => {
+                allEntries = allEntries.concat(monthEntries);
+            });
+            
+            // Filter entries up to today's date
+            allEntries = allEntries.filter(entry => {
+                const entryDate = new Date(entry.date);
+                return entryDate <= todayDate;
+            });
+            
+            // Sort by date
+            allEntries.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            return allEntries;
+        }
+
+        // Format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-IN', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(amount);
+        }
+
+        // Populate table
+        function populateTable() {
+            const entries = getAllEntries();
+            const tableBody = document.getElementById('tableBody');
+            const totalEntriesEl = document.getElementById('totalEntries');
+            const totalCreditsEl = document.getElementById('totalCredits');
+            const totalDebitsEl = document.getElementById('totalDebits');
+            const netBalanceEl = document.getElementById('netBalance');
+
+            let totalCredits = 0;
+            let totalDebits = 0;
+
+            tableBody.innerHTML = '';
+
+            entries.forEach(entry => {
+                const row = document.createElement('tr');
+                
+                totalCredits += entry.credit;
+                totalDebits += entry.debit;
+
+                row.innerHTML = `
+                    <td class="id">${entry.id}</td>
+                    <td class="date">${entry.date}</td>
+                    <td>${entry.desc}</td>
+                    <td class="type ${entry.type}">${entry.type}</td>
+                    <td class="flat">${entry.flat || '-'}</td>
+                    <td class="debit">${entry.debit > 0 ? formatCurrency(entry.debit) : '-'}</td>
+                    <td class="credit">${entry.credit > 0 ? formatCurrency(entry.credit) : '-'}</td>
+                    <td class="mode">${entry.mode}</td>
+                    <td>${entry.month}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+
+            // Update summary
+            totalEntriesEl.textContent = entries.length;
+            totalCreditsEl.textContent = '₹ ' + formatCurrency(totalCredits);
+            totalDebitsEl.textContent = '₹ ' + formatCurrency(totalDebits);
+            
+            const netBalance = totalCredits - totalDebits;
+            netBalanceEl.textContent = '₹ ' + formatCurrency(Math.abs(netBalance));
+            netBalanceEl.style.color = netBalance >= 0 ? '#28a745' : '#dc3545';
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', populateTable);
+    </script>
+</body>
+</html>
